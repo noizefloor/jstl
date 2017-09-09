@@ -4,6 +4,7 @@
 #include <thread>
 #include <atomic>
 #include <type_traits>
+#include <mutex>
 
 namespace jstd
 {
@@ -88,14 +89,13 @@ namespace jstd
         }
 
     private:
-        ProcessorFunction _processor;
-        std::thread _thread;
-
         std::queue<ForwardType> _queue;
         std::mutex _lock;
         std::condition_variable _cv;
 
         std::atomic_bool _shouldFinish { false };
 
+        ProcessorFunction _processor;
+        std::thread _thread;
     };
 }
