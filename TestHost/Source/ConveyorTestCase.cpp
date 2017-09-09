@@ -177,6 +177,27 @@ TEST(UnitTest_conveyor, notCopyable)
     EXPECT_THAT(results, ElementsAre("value1"s, "value2"s, "value3"s, "value4"s, "value5"s));
 }
 
+TEST(UnitTest_conveyor, conveyorPipe)
+{
+    auto&& results = std::vector<std::string>();
+
+    {
+        auto&& outputConveyor =
+                conveyor<std::string>( [&](auto&& value) { results.push_back(std::move(value)); });
+
+        auto&& inputConveyor =
+                conveyor<std::string>( [&](auto&& value) { outputConveyor.push(std::move(value)); });
+
+        inputConveyor.push("value1"s);
+        inputConveyor.push("value2"s);
+        inputConveyor.push("value3"s);
+        inputConveyor.push("value4"s);
+        inputConveyor.push("value5"s);
+    }
+
+    EXPECT_THAT(results, ElementsAre("value1"s, "value2"s, "value3"s, "value4"s, "value5"s));
+}
+
 TEST(PerformanceTest_conveyor, move)
 {
     auto&& results = std::vector<std::string>();
