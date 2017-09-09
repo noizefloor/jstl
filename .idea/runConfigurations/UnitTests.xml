@@ -1,0 +1,6 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="UnitTests" type="OCGoogleTestRunConfigurationType" factoryName="Google Test" PASS_PARENT_ENVS_2="true" PROJECT_NAME="TestHost" TARGET_NAME="TestHost" CONFIG_NAME="Debug" SCHEME_NAME="UnitTests" TEST_PATTERN="UnitTest*" TEST_MODE="PATTERN">
+    <envs />
+    <method />
+  </configuration>
+</component>
