@@ -28,8 +28,6 @@
 /* Begin PBXFileReference section */
 		758A2B9C85A268C8FBD0E167 /* ConveyorTestCase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ConveyorTestCase.cpp; sourceTree = "<group>"; };
 		7D7EC4541F634938005CE678 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		7D7EC4581F634B28005CE678 /* conveyor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = conveyor.h; sourceTree = "<group>"; };
-		7D7EC4591F634B28005CE678 /* jstl.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = jstl.xcodeproj; sourceTree = "<group>"; };
 		7D7EC4631F634E23005CE678 /* libgmock.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgmock.a; path = lib/xcode/libgmock.a; sourceTree = "<group>"; };
 		7D7EC4641F634E23005CE678 /* libgtest.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgtest.a; path = lib/xcode/libgtest.a; sourceTree = "<group>"; };
 		7DAE29871F633BD300F6D81D /* TestHost */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TestHost; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -57,31 +55,6 @@
 			path = Source;
 			sourceTree = "<group>";
 		};
-		7D7EC4561F634B28005CE678 /* lib */ = {
-			isa = PBXGroup;
-			children = (
-				7D7EC4571F634B28005CE678 /* concurrency */,
-				7D7EC4591F634B28005CE678 /* jstl.xcodeproj */,
-			);
-			name = lib;
-			path = ../lib;
-			sourceTree = "<group>";
-		};
-		7D7EC4571F634B28005CE678 /* concurrency */ = {
-			isa = PBXGroup;
-			children = (
-				7D7EC4581F634B28005CE678 /* conveyor.h */,
-			);
-			path = concurrency;
-			sourceTree = "<group>";
-		};
-		7D7EC45A1F634B28005CE678 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		7D7EC4671F634E35005CE678 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -95,7 +68,6 @@
 			isa = PBXGroup;
 			children = (
 				7D7EC4671F634E35005CE678 /* Frameworks */,
-				7D7EC4561F634B28005CE678 /* lib */,
 				7D7EC4531F634938005CE678 /* Source */,
 				7DAE29881F633BD300F6D81D /* Products */,
 			);
@@ -153,12 +125,6 @@
 			mainGroup = 7DAE297E1F633BD300F6D81D;
 			productRefGroup = 7DAE29881F633BD300F6D81D /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = 7D7EC45A1F634B28005CE678 /* Products */;
-					ProjectRef = 7D7EC4591F634B28005CE678 /* jstl.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
 				7DAE29861F633BD300F6D81D /* TestHost */,
