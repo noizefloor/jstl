@@ -3,14 +3,19 @@
 #include <queue>
 #include <thread>
 #include <atomic>
+#include <type_traits>
 
 namespace jstd
 {
-    template <typename T>
+    template <typename ForwardType>
     class conveyor
     {
+        static_assert(std::is_move_constructible<ForwardType>::value,
+                      "The template parameter is not move constructable. "
+                      "If this type cannot be made move constructable use std::unique_ptr<T>.");
+
     public:
-        using ProcessorFunction = std::function<void(T&&)>;
+        using ProcessorFunction = std::function<void(ForwardType&&)>;
 
     public:
         conveyor(const ProcessorFunction& processor)
@@ -35,11 +40,23 @@ namespace jstd
                 _thread.join();
         }
 
-        void push(T&& forwardValue)
+        void push(ForwardType&& forwardValue)
         {
             std::unique_lock<std::mutex> lock(_lock);
 
             _queue.push(std::move(forwardValue));
+
+            lock.unlock();
+            _cv.notify_one();
+        }
+
+        template <typename T = ForwardType>
+        typename std::enable_if<std::is_copy_constructible<T>::value >::type
+        push(const T& forwardValue)
+        {
+            std::unique_lock<std::mutex> lock(_lock);
+
+            _queue.push(forwardValue);
 
             lock.unlock();
             _cv.notify_one();
@@ -74,7 +91,7 @@ namespace jstd
         ProcessorFunction _processor;
         std::thread _thread;
 
-        std::queue<T> _queue;
+        std::queue<ForwardType> _queue;
         std::mutex _lock;
         std::condition_variable _cv;
 

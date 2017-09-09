@@ -1,0 +1,6 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="PerformanceTests" type="OCGoogleTestRunConfigurationType" factoryName="Google Test" PASS_PARENT_ENVS_2="true" PROJECT_NAME="TestHost" TARGET_NAME="TestHost" CONFIG_NAME="Release" SCHEME_NAME="PerformanceTests" TEST_PATTERN="PerformanceTest*" TEST_MODE="PATTERN">
+    <envs />
+    <method />
+  </configuration>
+</component>
