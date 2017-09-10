@@ -33,5 +33,6 @@ _ReSharper*/
 .DS_Store
 project.xcworkspace/
 xcuserdata/
-.idea/*
-!.idea/runConfigurations
+xcode/.idea/*
+!xcode/.idea/runConfigurations
+
