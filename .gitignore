@@ -36,3 +36,9 @@ xcuserdata/
 xcode/.idea/*
 !xcode/.idea/runConfigurations
 
+
+TestHost/\.idea/
+
+TestHost/cmake-build-debug/
+
+TestHost/cmake-build-release/

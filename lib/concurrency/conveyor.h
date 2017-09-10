@@ -5,6 +5,7 @@
 #include <atomic>
 #include <type_traits>
 #include <mutex>
+#include <condition_variable>
 
 namespace jstd
 {
