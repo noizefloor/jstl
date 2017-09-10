@@ -7,10 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		7D7EC4551F634938005CE678 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7D7EC4541F634938005CE678 /* main.cpp */; };
-		7D7EC4621F634DC7005CE678 /* ConveyorTestCase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 758A2B9C85A268C8FBD0E167 /* ConveyorTestCase.cpp */; };
-		7D7EC4651F634E23005CE678 /* libgmock.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7D7EC4631F634E23005CE678 /* libgmock.a */; };
-		7D7EC4661F634E23005CE678 /* libgtest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7D7EC4641F634E23005CE678 /* libgtest.a */; };
+		7D2ECDE61F658C430020DB0B /* ConveyorTestCase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7D2ECDE21F658C430020DB0B /* ConveyorTestCase.cpp */; };
+		7D2ECDE71F658C430020DB0B /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7D2ECDE31F658C430020DB0B /* main.cpp */; };
+		7D2ECDEB1F658D790020DB0B /* libgmock.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7D2ECDE91F658D790020DB0B /* libgmock.a */; };
+		7D2ECDEC1F658D790020DB0B /* libgtest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7D2ECDEA1F658D790020DB0B /* libgtest.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -26,10 +26,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		758A2B9C85A268C8FBD0E167 /* ConveyorTestCase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ConveyorTestCase.cpp; sourceTree = "<group>"; };
-		7D7EC4541F634938005CE678 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		7D7EC4631F634E23005CE678 /* libgmock.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgmock.a; path = lib/xcode/libgmock.a; sourceTree = "<group>"; };
-		7D7EC4641F634E23005CE678 /* libgtest.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgtest.a; path = lib/xcode/libgtest.a; sourceTree = "<group>"; };
+		7D2ECDE21F658C430020DB0B /* ConveyorTestCase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ConveyorTestCase.cpp; sourceTree = "<group>"; };
+		7D2ECDE31F658C430020DB0B /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		7D2ECDE91F658D790020DB0B /* libgmock.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgmock.a; path = ../lib/xcode/libgmock.a; sourceTree = "<group>"; };
+		7D2ECDEA1F658D790020DB0B /* libgtest.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgtest.a; path = ../lib/xcode/libgtest.a; sourceTree = "<group>"; };
 		7DAE29871F633BD300F6D81D /* TestHost */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TestHost; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -38,28 +38,29 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7D7EC4651F634E23005CE678 /* libgmock.a in Frameworks */,
-				7D7EC4661F634E23005CE678 /* libgtest.a in Frameworks */,
+				7D2ECDEB1F658D790020DB0B /* libgmock.a in Frameworks */,
+				7D2ECDEC1F658D790020DB0B /* libgtest.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		7D7EC4531F634938005CE678 /* Source */ = {
+		7D2ECDE11F658C430020DB0B /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				7D7EC4541F634938005CE678 /* main.cpp */,
-				758A2B9C85A268C8FBD0E167 /* ConveyorTestCase.cpp */,
+				7D2ECDE21F658C430020DB0B /* ConveyorTestCase.cpp */,
+				7D2ECDE31F658C430020DB0B /* main.cpp */,
 			);
-			path = Source;
+			name = Source;
+			path = ../Source;
 			sourceTree = "<group>";
 		};
 		7D7EC4671F634E35005CE678 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				7D7EC4631F634E23005CE678 /* libgmock.a */,
-				7D7EC4641F634E23005CE678 /* libgtest.a */,
+				7D2ECDE91F658D790020DB0B /* libgmock.a */,
+				7D2ECDEA1F658D790020DB0B /* libgtest.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -67,8 +68,8 @@
 		7DAE297E1F633BD300F6D81D = {
 			isa = PBXGroup;
 			children = (
+				7D2ECDE11F658C430020DB0B /* Source */,
 				7D7EC4671F634E35005CE678 /* Frameworks */,
-				7D7EC4531F634938005CE678 /* Source */,
 				7DAE29881F633BD300F6D81D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -137,8 +138,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7D7EC4621F634DC7005CE678 /* ConveyorTestCase.cpp in Sources */,
-				7D7EC4551F634938005CE678 /* main.cpp in Sources */,
+				7D2ECDE71F658C430020DB0B /* main.cpp in Sources */,
+				7D2ECDE61F658C430020DB0B /* ConveyorTestCase.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -231,14 +232,12 @@
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				HEADER_SEARCH_PATHS = (
-					../lib,
-					./inc,
+					"\"$(SRCROOT)/../inc\"",
+					"\"$(SRCROOT)/../../lib\"",
 				);
-				LIBRARY_SEARCH_PATHS = (
-					./lib/xcode,
-					"$(PROJECT_DIR)/lib/xcode",
-				);
+				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)/../lib/xcode\"";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SYMROOT = build;
 			};
 			name = Debug;
 		};
@@ -247,14 +246,13 @@
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				HEADER_SEARCH_PATHS = (
-					../lib,
-					./inc,
+					"\"$(SRCROOT)/../inc\"",
+					"\"$(SRCROOT)/../../lib\"",
 				);
-				LIBRARY_SEARCH_PATHS = (
-					./lib/xcode,
-					"$(PROJECT_DIR)/lib/xcode",
-				);
+				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)/../lib/xcode\"";
+				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SYMROOT = build;
 			};
 			name = Release;
 		};
