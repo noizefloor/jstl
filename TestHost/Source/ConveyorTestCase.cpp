@@ -242,5 +242,5 @@ TEST(PerformanceTest_conveyor, copy)
     }
 
     auto&& duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start);
-    EXPECT_GT(std::chrono::milliseconds(17000), duration) << std::to_string(duration.count());
+    EXPECT_GT(std::chrono::milliseconds(20000), duration) << std::to_string(duration.count());
 }

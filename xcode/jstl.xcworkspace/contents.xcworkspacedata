@@ -2,10 +2,10 @@
 <Workspace
    version = "1.0">
    <Group
-      location = "group:lib"
+      location = "container:"
       name = "jstl">
       <Group
-         location = "group:concurrency"
+         location = "group:../lib/concurrency"
          name = "concurrency">
          <FileRef
             location = "group:conveyor.h">
@@ -13,6 +13,6 @@
       </Group>
    </Group>
    <FileRef
-      location = "group:TestHost/TestHost.xcodeproj">
+      location = "group:../TestHost/xcode/TestHost.xcodeproj">
    </FileRef>
 </Workspace>
