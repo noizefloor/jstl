@@ -1,10 +1,5 @@
 #include "stdafx.h"
 
-#include <string>
-#include <vector>
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
-
 #include <concurrency/conveyor.h>
 
 using jstd::conveyor;
@@ -205,7 +200,7 @@ TEST(PerformanceTest_conveyor, move)
     auto&& results = std::vector<std::string>();
 
     auto&& start = std::chrono::steady_clock::time_point();
-    auto&& stringValue = std::string(10000, 'a');
+    auto&& stringValue = std::string(100, 'a');
 
     {
         auto&& testConveyor =
@@ -218,7 +213,7 @@ TEST(PerformanceTest_conveyor, move)
     }
 
     auto&& duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start);
-    EXPECT_GT(std::chrono::milliseconds(15000), duration) << std::to_string(duration.count());
+    EXPECT_GT(std::chrono::milliseconds(10000), duration) << std::to_string(duration.count());
 }
 
 TEST(PerformanceTest_conveyor, copy)
@@ -226,7 +221,7 @@ TEST(PerformanceTest_conveyor, copy)
     auto&& results = std::vector<std::string>();
 
     auto&& start = std::chrono::steady_clock::time_point();
-    auto&& stringValue = std::string(10000, 'a');
+    auto&& stringValue = std::string(100, 'a');
 
     {
         auto&& testConveyor =
@@ -242,5 +237,5 @@ TEST(PerformanceTest_conveyor, copy)
     }
 
     auto&& duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start);
-    EXPECT_GT(std::chrono::milliseconds(21000), duration) << std::to_string(duration.count());
+    EXPECT_GT(std::chrono::milliseconds(11000), duration) << std::to_string(duration.count());
 }
