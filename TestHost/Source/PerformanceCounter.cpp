@@ -1,7 +1,5 @@
 #include "stdafx.h"
 
-#include <ctime>
-
 #include "PerformanceCounter.h"
 
 
@@ -74,7 +72,8 @@ void PerformanceCounter::writeStatistics()
     auto&& minDuration = std::min_element(_results.cbegin(), _results.cend());
     auto&& maxDuration = std::max_element(_results.cbegin(), _results.cend());
 
-    output << std::put_time(&localtime_safe(std::time(nullptr)), "%c %Z")
+    auto&& tm = localtime_safe(std::time(nullptr));
+    output << std::put_time(&tm, "%c %Z")
            << " - times: " << _results.size()
            << ", total: " << toString(total)
            << ", average: " << toString(total / _results.size())
