@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#include <ctime>
+
 #include "PerformanceCounter.h"
 
 
@@ -47,6 +49,20 @@ void PerformanceCounter::stop()
     _results.push_back(stopTime - _startTime);
 }
 
+namespace
+{
+    std::tm localtime_safe(const std::time_t& time)
+    {
+        auto&& tm_snapshot = std::tm();
+#if (defined(WIN32) || defined(_WIN32) || defined(__WIN32__))
+        localtime_s(&tm_snapshot, &time);
+#else
+        localtime_r(&time, &tm_snapshot);
+#endif
+        return tm_snapshot;
+    }
+}
+
 void PerformanceCounter::writeStatistics()
 {
     if (_results.empty())
@@ -58,8 +74,7 @@ void PerformanceCounter::writeStatistics()
     auto&& minDuration = std::min_element(_results.cbegin(), _results.cend());
     auto&& maxDuration = std::max_element(_results.cbegin(), _results.cend());
 
-    auto&& now = std::time(nullptr);
-    output << std::put_time(std::localtime(&now), "%c %Z")
+    output << std::put_time(&localtime_safe(std::time(nullptr)), "%c %Z")
            << " - times: " << _results.size()
            << ", total: " << toString(total)
            << ", average: " << toString(total / _results.size())
