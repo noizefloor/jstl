@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		758A238F14CAAE7E4742D2EA /* PerformanceCounter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 758A21B5E307A0A84749F482 /* PerformanceCounter.cpp */; };
 		7D2ECDE61F658C430020DB0B /* ConveyorTestCase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7D2ECDE21F658C430020DB0B /* ConveyorTestCase.cpp */; };
 		7D2ECDE71F658C430020DB0B /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7D2ECDE31F658C430020DB0B /* main.cpp */; };
 		7D2ECDEB1F658D790020DB0B /* libgmock.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7D2ECDE91F658D790020DB0B /* libgmock.a */; };
@@ -26,6 +27,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		758A2099B3417447570E4E09 /* PerformanceCounter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PerformanceCounter.h; sourceTree = "<group>"; };
+		758A21B5E307A0A84749F482 /* PerformanceCounter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PerformanceCounter.cpp; sourceTree = "<group>"; };
 		7D2ECDE21F658C430020DB0B /* ConveyorTestCase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ConveyorTestCase.cpp; sourceTree = "<group>"; };
 		7D2ECDE31F658C430020DB0B /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		7D2ECDE91F658D790020DB0B /* libgmock.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libgmock.a; path = ../lib/xcode/libgmock.a; sourceTree = "<group>"; };
@@ -51,6 +54,8 @@
 			children = (
 				7D2ECDE21F658C430020DB0B /* ConveyorTestCase.cpp */,
 				7D2ECDE31F658C430020DB0B /* main.cpp */,
+				758A21B5E307A0A84749F482 /* PerformanceCounter.cpp */,
+				758A2099B3417447570E4E09 /* PerformanceCounter.h */,
 			);
 			name = Source;
 			path = ../Source;
@@ -140,6 +145,7 @@
 			files = (
 				7D2ECDE71F658C430020DB0B /* main.cpp in Sources */,
 				7D2ECDE61F658C430020DB0B /* ConveyorTestCase.cpp in Sources */,
+				758A238F14CAAE7E4742D2EA /* PerformanceCounter.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -151,7 +157,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -183,10 +189,11 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				STRIP_INSTALLED_PRODUCT = NO;
 			};
 			name = Debug;
 		};
@@ -195,7 +202,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -209,7 +216,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "-";
-				COPY_PHASE_STRIP = NO;
+				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -221,22 +228,24 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
+				STRIP_INSTALLED_PRODUCT = YES;
 			};
 			name = Release;
 		};
 		7DAE298F1F633BD300F6D81D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/../../bin/xcode/$(CONFIGURATION)";
 				HEADER_SEARCH_PATHS = (
 					"\"$(SRCROOT)/../inc\"",
 					"\"$(SRCROOT)/../../lib\"",
 				);
 				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)/../lib/xcode\"";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = YES;
 				SYMROOT = build;
 			};
 			name = Debug;
@@ -244,7 +253,7 @@
 		7DAE29901F633BD300F6D81D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CONFIGURATION_BUILD_DIR = "$(PROJECT_DIR)/../../bin/xcode/$(CONFIGURATION)";
 				HEADER_SEARCH_PATHS = (
 					"\"$(SRCROOT)/../inc\"",
 					"\"$(SRCROOT)/../../lib\"",
@@ -252,6 +261,7 @@
 				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)/../lib/xcode\"";
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = YES;
 				SYMROOT = build;
 			};
 			name = Release;

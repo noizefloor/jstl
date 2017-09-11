@@ -2,6 +2,8 @@
 
 #include <concurrency/conveyor.h>
 
+#include "PerformanceCounter.h"
+
 using jstd::conveyor;
 using testing::ElementsAre;
 using namespace std::literals::string_literals;
@@ -12,7 +14,7 @@ TEST(UnitTest_conveyor, pushByMoveAndWait)
 
     {
         auto&& testConveyor =
-                conveyor<std::string>( [&](auto&& value) { results.push_back(std::move(value)); });
+                conveyor<std::string>( [&](std::string&& value) { results.push_back(std::move(value)); });
 
         testConveyor.push("value1"s);
         testConveyor.push("value2"s);
@@ -197,45 +199,45 @@ TEST(UnitTest_conveyor, conveyorPipe)
 
 TEST(PerformanceTest_conveyor, move)
 {
+    auto&& pc = PerformanceCounter(*testing::UnitTest::GetInstance());
     auto&& results = std::vector<std::string>();
 
-    auto&& start = std::chrono::steady_clock::time_point();
     auto&& stringValue = std::string(100, 'a');
 
+    for (auto i = 0; i < 10; ++i)
     {
         auto&& testConveyor =
                 conveyor<std::string>( [&](auto&& value) { results.push_back(static_cast<std::string>(value)); });
 
-        start = std::chrono::steady_clock::now();
+        pc.start();
 
-        for (auto i = 0; i < 1000000; ++i)
-            testConveyor.push(stringValue + std::to_string(i));
+        for (auto j = 0; j < 100000; ++j)
+            testConveyor.push(stringValue + std::to_string(j));
+
+        pc.stop();
     }
-
-    auto&& duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start);
-    EXPECT_GT(std::chrono::milliseconds(10000), duration) << std::to_string(duration.count());
 }
 
 TEST(PerformanceTest_conveyor, copy)
 {
-    auto&& results = std::vector<std::string>();
+    auto&& pc = PerformanceCounter(*testing::UnitTest::GetInstance());
 
-    auto&& start = std::chrono::steady_clock::time_point();
+    auto&& results = std::vector<std::string>();
     auto&& stringValue = std::string(100, 'a');
 
+    for (auto i = 0; i < 10; ++i)
     {
         auto&& testConveyor =
                 conveyor<std::string>( [&](auto&& value) { results.push_back(static_cast<std::string>(value)); });
 
-        start = std::chrono::steady_clock::now();
+        pc.start();
 
-        for (auto i = 0; i < 1000000; ++i)
+        for (auto j = 0; j < 100000; ++j)
         {
-            const auto value = stringValue + std::to_string(i);
+            const auto value = stringValue + std::to_string(j);
             testConveyor.push(value);
         }
-    }
 
-    auto&& duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start);
-    EXPECT_GT(std::chrono::milliseconds(11000), duration) << std::to_string(duration.count());
+        pc.stop();
+    }
 }
