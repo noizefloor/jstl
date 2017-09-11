@@ -206,13 +206,15 @@ TEST(PerformanceTest_conveyor, move)
 
     for (auto i = 0; i < 10; ++i)
     {
-        auto&& testConveyor =
-                conveyor<std::string>( [&](auto&& value) { results.push_back(static_cast<std::string>(value)); });
+        {
+            auto&& testConveyor =
+                    conveyor<std::string>( [&](auto&& value) { results.push_back(std::move(value)); });
 
-        pc.start();
+            pc.start();
 
-        for (auto j = 0; j < 100000; ++j)
-            testConveyor.push(stringValue + std::to_string(j));
+            for (auto j = 0; j < 100000; ++j)
+                testConveyor.push(stringValue + std::to_string(j));
+        }
 
         pc.stop();
     }
@@ -227,15 +229,17 @@ TEST(PerformanceTest_conveyor, copy)
 
     for (auto i = 0; i < 10; ++i)
     {
-        auto&& testConveyor =
-                conveyor<std::string>( [&](auto&& value) { results.push_back(static_cast<std::string>(value)); });
-
-        pc.start();
-
-        for (auto j = 0; j < 100000; ++j)
         {
-            const auto value = stringValue + std::to_string(j);
-            testConveyor.push(value);
+            auto&& testConveyor =
+                    conveyor<std::string>( [&](auto&& value) { results.push_back(std::move(value)); });
+
+            pc.start();
+
+            for (auto j = 0; j < 100000; ++j)
+            {
+                const auto value = stringValue + std::to_string(j);
+                testConveyor.push(value);
+            }
         }
 
         pc.stop();
