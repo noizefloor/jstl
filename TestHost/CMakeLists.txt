@@ -9,6 +9,7 @@ link_directories( lib/linux )
 
 set(SOURCE_FILES
         Source/ConveyorTestCase.cpp
+        Source/PerformanceCounter.cpp
         Source/main.cpp)
 
 set(LIBRARIES
@@ -16,7 +17,7 @@ set(LIBRARIES
         gmock
         pthread)
 
-set(CMAKE_CXX_FLAGS "-Wall -Werror -v")
+set(CMAKE_CXX_FLAGS "-Wall -Werror")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 set(CMAKE_CXX_FLAGS_DEBUG  "-Og")
 
