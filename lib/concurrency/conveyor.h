@@ -23,7 +23,7 @@
 // SOFTWARE.
 
 #include <queue>
-#include <thread>
+#include <future>
 #include <atomic>
 #include <type_traits>
 #include <mutex>
@@ -44,13 +44,13 @@ namespace jstd
     public:
         conveyor(const ProcessorFunction& processor)
             : _processor(processor)
-            , _thread([this] { run(); })
+            , _thread(std::async(std::launch::async, [this] { run(); }))
         {
         }
 
         conveyor(ProcessorFunction&& processor)
             : _processor(std::move(processor))
-            , _thread([this] { run(); })
+            , _thread(std::async(std::launch::async, [this] { run(); }))
         {
         }
 
@@ -60,8 +60,7 @@ namespace jstd
 
             _cv.notify_one();
 
-            if (_thread.joinable())
-                _thread.join();
+            _thread.wait();
         }
 
         void push(ForwardType&& forwardValue)
@@ -120,6 +119,6 @@ namespace jstd
         std::atomic_bool _shouldFinish { false };
 
         ProcessorFunction _processor;
-        std::thread _thread;
+        std::future<void> _thread;
     };
 }
