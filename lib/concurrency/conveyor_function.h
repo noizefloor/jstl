@@ -22,45 +22,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <queue>
-#include <future>
-#include <atomic>
+#include <functional>
 #include <type_traits>
+#include <queue>
 #include <mutex>
 #include <condition_variable>
+#include <future>
 
 namespace jstd
 {
     template <typename ForwardType>
-    class conveyor
+    class conveyor_forwarder
     {
-        static_assert(std::is_move_constructible<ForwardType>::value,
-                      "The template parameter is not move constructable. "
-                      "If this type cannot be made move constructable use std::unique_ptr<T>.");
-
     public:
-        using ProcessorFunction = std::function<void(ForwardType&&)>;
-
-    public:
-        conveyor(const ProcessorFunction& processor)
-            : _processor(processor)
-            , _processorHandle(std::async(std::launch::async, [this] { run(); }))
-        {
-        }
-
-        conveyor(ProcessorFunction&& processor)
+        conveyor_forwarder(std::function<void(ForwardType&&)>&& processor)
             : _processor(std::move(processor))
             , _processorHandle(std::async(std::launch::async, [this] { run(); }))
         {
-        }
-
-        ~conveyor()
-        {
-            _shouldFinish = true;
-
-            _cv.notify_one();
-
-            _processorHandle.wait();
         }
 
         void push(ForwardType&& forwardValue)
@@ -75,11 +53,25 @@ namespace jstd
             push_internal(forwardValue);
         }
 
-    private:
+        void finish()
+        {
+            _shouldFinish = true;
+            _cv.notify_one();
+            _processorHandle.wait();
+        }
 
+        void checkForError() const
+        {
+            if (_hasError)
+                std::rethrow_exception(_error);
+        }
+
+    private:
         template <typename T>
         void push_internal(T&& forwardValue)
         {
+            checkForError();
+
             std::unique_lock<std::mutex> lock(_lock);
 
             _queue.push(std::forward<T>(forwardValue));
@@ -90,24 +82,32 @@ namespace jstd
 
         void run()
         {
-            while(true)
+            try
             {
-                std::unique_lock<std::mutex> lock(_lock);
-
-                if (_queue.empty() && !_shouldFinish)
-                    _cv.wait(lock, [this] { return !_queue.empty() || _shouldFinish; });
-
-                if (!_queue.empty())
+                while(true)
                 {
-                    auto value = std::forward<ForwardType>(_queue.front());
-                    _queue.pop();
+                    std::unique_lock<std::mutex> lock(_lock);
 
-                    lock.unlock();
+                    if (_queue.empty() && !_shouldFinish)
+                        _cv.wait(lock, [this] { return !_queue.empty() || _shouldFinish; });
 
-                    _processor(std::forward<ForwardType>(value));
+                    if (!_queue.empty())
+                    {
+                        auto value = std::forward<ForwardType>(_queue.front());
+                        _queue.pop();
+
+                        lock.unlock();
+
+                        _processor(std::forward<ForwardType>(value));
+                    }
+                    else if (_shouldFinish)
+                        return;
                 }
-                else if (_shouldFinish)
-                    return;
+            }
+            catch (...)
+            {
+                _error = std::current_exception();
+                _hasError = true;
             }
         }
 
@@ -118,7 +118,37 @@ namespace jstd
 
         std::atomic_bool _shouldFinish { false };
 
-        ProcessorFunction _processor;
+        std::function<void(ForwardType&&)> _processor;
         std::future<void> _processorHandle;
+
+        std::exception_ptr _error;
+        std::atomic_bool _hasError{ false };
     };
-}
+
+    template <typename ForwardType>
+    void conveyor_function(std::function<void(conveyor_forwarder<ForwardType>&)>&& producer,
+                           std::function<void(ForwardType&&)>&& processor)
+    {
+        static_assert(std::is_move_constructible<ForwardType>::value,
+                      "The template parameter is not move constructable. "
+                              "If this type cannot be made move constructable use std::unique_ptr<T>.");
+
+        auto&& forwarder =
+                conveyor_forwarder<ForwardType>(std::forward<std::function<void(ForwardType&&)> >(processor));
+
+        try
+        {
+            producer(forwarder);
+        }
+        catch (...)
+        {
+            forwarder.finish();
+            throw;
+        }
+
+        forwarder.finish();
+        forwarder.checkForError();
+    }
+
+} // jstd
+
