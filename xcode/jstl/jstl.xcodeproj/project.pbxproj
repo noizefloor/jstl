@@ -1,0 +1,83 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXFileReference section */
+		758A2FD982D31DD58A7C8857 /* conveyor_function.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = conveyor_function.h; sourceTree = "<group>"; };
+		7D06AAD61F688DDE0010A12B /* conveyor.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = conveyor.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		7D06AACF1F688DD10010A12B = {
+			isa = PBXGroup;
+			children = (
+				7D06AAD71F688DDE0010A12B /* concurrency */,
+			);
+			sourceTree = "<group>";
+		};
+		7D06AAD71F688DDE0010A12B /* concurrency */ = {
+			isa = PBXGroup;
+			children = (
+				7D06AAD61F688DDE0010A12B /* conveyor.h */,
+				758A2FD982D31DD58A7C8857 /* conveyor_function.h */,
+			);
+			name = concurrency;
+			path = ../../lib/concurrency;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXProject section */
+		7D06AAD01F688DD10010A12B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0730;
+			};
+			buildConfigurationList = 7D06AAD31F688DD10010A12B /* Build configuration list for PBXProject "jstl" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 7D06AACF1F688DD10010A12B;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		7D06AAD41F688DD10010A12B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		7D06AAD51F688DD10010A12B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		7D06AAD31F688DD10010A12B /* Build configuration list for PBXProject "jstl" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7D06AAD41F688DD10010A12B /* Debug */,
+				7D06AAD51F688DD10010A12B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 7D06AAD01F688DD10010A12B /* Project object */;
+}
