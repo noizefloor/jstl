@@ -8,9 +8,15 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "concurrency", "concurrency", "{39346FCF-DCF5-48CF-8D2F-67997464D97F}"
 	ProjectSection(SolutionItems) = preProject
 		lib\concurrency\conveyor.h = lib\concurrency\conveyor.h
+		lib\concurrency\conveyor_function.h = lib\concurrency\conveyor_function.h
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestHost", "TestHost\TestHost.vcxproj", "{07DC013D-00DA-460C-8022-A23F1EF80A0F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "internal", "internal", "{AC3DBC88-2EB4-4AE2-9F8C-2943F5F342BA}"
+	ProjectSection(SolutionItems) = preProject
+		lib\concurrency\internal\conveyor_function_internal.h = lib\concurrency\internal\conveyor_function_internal.h
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,5 +40,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{39346FCF-DCF5-48CF-8D2F-67997464D97F} = {55085524-66B0-4E2A-9F39-1DAAFEF1620B}
+		{AC3DBC88-2EB4-4AE2-9F8C-2943F5F342BA} = {39346FCF-DCF5-48CF-8D2F-67997464D97F}
 	EndGlobalSection
 EndGlobal
