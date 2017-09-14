@@ -22,132 +22,74 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <functional>
+#include "internal/conveyor_function_internal.h"
+
 #include <type_traits>
-#include <queue>
-#include <mutex>
-#include <condition_variable>
-#include <future>
 
 namespace jstd
 {
-    template <typename ForwardType>
+    template <typename ForwardT>
+    class conveyor_forwarder;
+
+
+    template<typename T>
+    using conveyor_consumer = std::function<void(T&&)>;
+
+    template<typename T>
+    using conveyor_producer = std::function<void(conveyor_forwarder<T>&)>;
+
+
+    template <typename ForwardT>
     class conveyor_forwarder
     {
     public:
-        conveyor_forwarder(std::function<void(ForwardType&&)>&& processor)
-            : _processor(std::move(processor))
-            , _processorHandle(std::async(std::launch::async, [this] { run(); }))
+        explicit conveyor_forwarder(internal::conveyor_forwarder<ForwardT>& forwarder)
+            : _forwarder(forwarder)
         {
         }
 
-        void push(ForwardType&& forwardValue)
+        void push(ForwardT&& forwardValue)
         {
-            push_internal(std::move(forwardValue));
+            _forwarder.push(std::move(forwardValue));
         }
 
-        template <typename T = ForwardType>
+        template<typename T = ForwardT>
         void push(const T& forwardValue,
-                  typename std::enable_if<std::is_copy_constructible<T>::value>::type* = 0 )
+                  typename std::enable_if<std::is_copy_constructible<T>::value>::type* = 0)
         {
-            push_internal(forwardValue);
-        }
-
-        void finish()
-        {
-            _shouldFinish = true;
-            _cv.notify_one();
-            _processorHandle.wait();
-        }
-
-        void checkForError() const
-        {
-            if (_hasError)
-                std::rethrow_exception(_error);
+            _forwarder.push(std::move(forwardValue));
         }
 
     private:
-        template <typename T>
-        void push_internal(T&& forwardValue)
-        {
-            checkForError();
-
-            std::unique_lock<std::mutex> lock(_lock);
-
-            _queue.push(std::forward<T>(forwardValue));
-
-            lock.unlock();
-            _cv.notify_one();
-        }
-
-        void run()
-        {
-            try
-            {
-                while(true)
-                {
-                    std::unique_lock<std::mutex> lock(_lock);
-
-                    if (_queue.empty() && !_shouldFinish)
-                        _cv.wait(lock, [this] { return !_queue.empty() || _shouldFinish; });
-
-                    if (!_queue.empty())
-                    {
-                        auto value = std::forward<ForwardType>(_queue.front());
-                        _queue.pop();
-
-                        lock.unlock();
-
-                        _processor(std::forward<ForwardType>(value));
-                    }
-                    else if (_shouldFinish)
-                        return;
-                }
-            }
-            catch (...)
-            {
-                _error = std::current_exception();
-                _hasError = true;
-            }
-        }
-
-    private:
-        std::queue<ForwardType> _queue;
-        std::mutex _lock;
-        std::condition_variable _cv;
-
-        std::atomic_bool _shouldFinish { false };
-
-        std::function<void(ForwardType&&)> _processor;
-        std::future<void> _processorHandle;
-
-        std::exception_ptr _error;
-        std::atomic_bool _hasError{ false };
+        internal::conveyor_forwarder<ForwardT>& _forwarder;
     };
 
-    template <typename ForwardType>
-    void conveyor_function(std::function<void(conveyor_forwarder<ForwardType>&)>&& producer,
-                           std::function<void(ForwardType&&)>&& processor)
+
+    template <typename ForwardT,
+              typename ProducerT = conveyor_producer<ForwardT>,
+              typename ConsumerT = conveyor_consumer<ForwardT> >
+    void conveyor_function(ProducerT&& producer,
+                           ConsumerT&& consumer)
     {
-        static_assert(std::is_move_constructible<ForwardType>::value,
+        static_assert(std::is_move_constructible<ForwardT>::value,
                       "The template parameter is not move constructable. "
                               "If this type cannot be made move constructable use std::unique_ptr<T>.");
 
-        auto&& forwarder =
-                conveyor_forwarder<ForwardType>(std::forward<std::function<void(ForwardType&&)> >(processor));
+        auto&& internalForwarder = internal::conveyor_forwarder<ForwardT>(std::forward<ConsumerT>(consumer));
 
         try
         {
+            auto&& forwarder = conveyor_forwarder<ForwardT>(internalForwarder);
             producer(forwarder);
         }
         catch (...)
         {
-            forwarder.finish();
+            internalForwarder.finish();
             throw;
         }
 
-        forwarder.finish();
-        forwarder.checkForError();
+        internalForwarder.finish();
+        internalForwarder.checkForError();
     }
 
 } // jstd

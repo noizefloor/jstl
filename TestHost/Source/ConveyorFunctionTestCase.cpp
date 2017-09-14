@@ -9,7 +9,7 @@ TEST(UnitTest_conveyor_function, pushByMove)
 {
     auto&& results = std::vector<std::string>();
 
-    jstd::conveyor_function<std::string>([](auto& forwarder)
+    jstd::conveyor_function<std::string>([](jstd::conveyor_forwarder<std::string>& forwarder)
                                          {
                                              forwarder.push("value1"s);
                                              forwarder.push("value2"s);
@@ -33,7 +33,7 @@ TEST(UnitTest_conveyor_function, pushByCopy)
 
     auto&& values = std::vector<std::string>{ "value1"s, "value2"s, "value3"s, "value4"s, "value5"s };
 
-    jstd::conveyor_function<std::string>([&](auto& forwarder)
+    jstd::conveyor_function<std::string>([&](jstd::conveyor_forwarder<std::string>& forwarder)
                                          {
                                              for (const auto& value : values)
                                                 forwarder.push(value);
@@ -52,7 +52,7 @@ TEST(UnitTest_conveyor_function, copyFirstFunctions)
 {
     auto&& results = std::vector<std::string>();
 
-    auto producer = [](auto& forwarder)
+    auto producer = [](jstd::conveyor_forwarder<std::string>& forwarder)
     {
         forwarder.push("value1"s);
         forwarder.push("value2"s);

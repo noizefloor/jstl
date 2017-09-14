@@ -7,11 +7,20 @@
 	objects = {
 
 /* Begin PBXFileReference section */
+		758A2E03C4B267A9DDA474D1 /* conveyor_function_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = conveyor_function_internal.h; sourceTree = "<group>"; };
 		758A2FD982D31DD58A7C8857 /* conveyor_function.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = conveyor_function.h; sourceTree = "<group>"; };
 		7D06AAD61F688DDE0010A12B /* conveyor.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = conveyor.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
+		758A2D87C91DEB591F9FC8E1 /* internal */ = {
+			isa = PBXGroup;
+			children = (
+				758A2E03C4B267A9DDA474D1 /* conveyor_function_internal.h */,
+			);
+			path = internal;
+			sourceTree = "<group>";
+		};
 		7D06AACF1F688DD10010A12B = {
 			isa = PBXGroup;
 			children = (
@@ -24,6 +33,7 @@
 			children = (
 				7D06AAD61F688DDE0010A12B /* conveyor.h */,
 				758A2FD982D31DD58A7C8857 /* conveyor_function.h */,
+				758A2D87C91DEB591F9FC8E1 /* internal */,
 			);
 			name = concurrency;
 			path = ../../lib/concurrency;
