@@ -65,17 +65,15 @@ namespace jstd
     };
 
 
-    template <typename ForwardT,
-              typename ProducerT = conveyor_producer<ForwardT>,
-              typename ConsumerT = conveyor_consumer<ForwardT> >
-    void conveyor_function(ProducerT&& producer,
-                           ConsumerT&& consumer)
+    template <typename ForwardT>
+    void conveyor_function(conveyor_producer<ForwardT>&& producer, conveyor_consumer<ForwardT>&& consumer)
     {
         static_assert(std::is_move_constructible<ForwardT>::value,
                       "The template parameter is not move constructable. "
                               "If this type cannot be made move constructable use std::unique_ptr<T>.");
 
-        auto&& internalForwarder = internal::conveyor_forwarder<ForwardT>(std::forward<ConsumerT>(consumer));
+        auto&& internalForwarder =
+                internal::conveyor_forwarder<ForwardT>(std::forward<conveyor_consumer<ForwardT>>(consumer));
 
         try
         {
