@@ -6,14 +6,14 @@ using namespace ::testing;
 
 using namespace jstd;
 
-TEST(UnitTest_FunctionTraits, lambda_returnType)
+TEST(UnitTest_function_traits, lambda_returnType)
 {
     auto function = [] { return 10; };
 
     EXPECT_THAT(function(), A<function_traits<decltype(function)>::result_type>());
 }
 
-TEST(UnitTest_FunctionTraits, lambda_parameterCount_zero)
+TEST(UnitTest_function_traits, lambda_parameterCount_zero)
 {
     auto function = [] { return 10; };
 
@@ -22,7 +22,7 @@ TEST(UnitTest_FunctionTraits, lambda_parameterCount_zero)
     EXPECT_EQ(0, parameterCount);
 }
 
-TEST(UnitTest_FunctionTraits, lambda_parameterCount_five)
+TEST(UnitTest_function_traits, lambda_parameterCount_five)
 {
     auto function = [] (int, int, long, float, double) { return 10; };
 
@@ -31,7 +31,7 @@ TEST(UnitTest_FunctionTraits, lambda_parameterCount_five)
     EXPECT_EQ(5, parameterCount);
 }
 
-TEST(UnitTest_FunctionTraits, lambda_parameter)
+TEST(UnitTest_function_traits, lambda_parameter)
 {
     auto function = [] (int, int, long) { return 10; };
 
@@ -47,7 +47,7 @@ TEST(UnitTest_FunctionTraits, lambda_parameter)
     EXPECT_TRUE(param2) << "arg<2> is not an long";
 }
 
-TEST(UnitTest_FunctionTraits, lambda_reference)
+TEST(UnitTest_function_traits, lambda_reference)
 {
     auto function = [] { return 10; };
     auto& functionRef = function;
@@ -55,7 +55,7 @@ TEST(UnitTest_FunctionTraits, lambda_reference)
     EXPECT_THAT(function(), A<function_traits<decltype(functionRef)>::result_type>());
 }
 
-TEST(UnitTest_FunctionTraits, lambda_constReference)
+TEST(UnitTest_function_traits, lambda_constReference)
 {
     auto function = [] { return 10; };
     const auto& functionRef = function;
@@ -63,21 +63,21 @@ TEST(UnitTest_FunctionTraits, lambda_constReference)
     EXPECT_THAT(function(), A<function_traits<decltype(functionRef)>::result_type>());
 }
 
-TEST(UnitTest_FunctionTraits, lambda_rValue)
+TEST(UnitTest_function_traits, lambda_rValue)
 {
     auto&& function = [] { return 10; };
 
     EXPECT_THAT(function(), A<function_traits<decltype(function)>::result_type>());
 }
 
-TEST(UnitTest_FunctionTraits, std_function_returnType)
+TEST(UnitTest_function_traits, std_function_returnType)
 {
     std::function<int()> function = [] { return 10; };
 
     EXPECT_THAT(function(), A<function_traits<decltype(function)>::result_type>());
 }
 
-TEST(UnitTest_FunctionTraits, std_function_parameterCount_zero)
+TEST(UnitTest_function_traits, std_function_parameterCount_zero)
 {
     std::function<int()> function = [] { return 10; };
 
@@ -86,7 +86,7 @@ TEST(UnitTest_FunctionTraits, std_function_parameterCount_zero)
     EXPECT_EQ(0, parameterCount);
 }
 
-TEST(UnitTest_FunctionTraits, std_function_parameterCount_five)
+TEST(UnitTest_function_traits, std_function_parameterCount_five)
 {
     std::function<int(int, int, long, float, double)> function =
             [] (int, int, long, float, double) { return 10; };
@@ -96,7 +96,7 @@ TEST(UnitTest_FunctionTraits, std_function_parameterCount_five)
     EXPECT_EQ(5, parameterCount);
 }
 
-TEST(UnitTest_FunctionTraits, std_function_parameter)
+TEST(UnitTest_function_traits, std_function_parameter)
 {
     std::function<int(int, int, long)> function = [] (int, int, long) { return 10; };
 
@@ -112,7 +112,7 @@ TEST(UnitTest_FunctionTraits, std_function_parameter)
     EXPECT_TRUE(param2) << "arg<0> is not an long";
 }
 
-TEST(UnitTest_FunctionTraits, std_function_reference)
+TEST(UnitTest_function_traits, std_function_reference)
 {
     std::function<int()> function = [] { return 10; };
     auto& functionRef = function;
@@ -120,7 +120,7 @@ TEST(UnitTest_FunctionTraits, std_function_reference)
     EXPECT_THAT(function(), A<function_traits<decltype(functionRef)>::result_type>());
 }
 
-TEST(UnitTest_FunctionTraits, std_function_constReference)
+TEST(UnitTest_function_traits, std_function_constReference)
 {
     std::function<int()> function = [] { return 10; };
     const auto& functionRef = function;
@@ -128,7 +128,7 @@ TEST(UnitTest_FunctionTraits, std_function_constReference)
     EXPECT_THAT(function(), A<function_traits<decltype(functionRef)>::result_type>());
 }
 
-TEST(UnitTest_FunctionTraits, std_function_rValue)
+TEST(UnitTest_function_traits, std_function_rValue)
 {
     std::function<int()> function = [] { return 10; };
 
@@ -145,21 +145,21 @@ namespace
     }
 }
 
-TEST(UnitTest_FunctionTraits, function_returnType)
+TEST(UnitTest_function_traits, function_returnType)
 {
     auto result = testFunction(1, 2, 3.);
 
     EXPECT_THAT(result, testing::A<function_traits<decltype(&testFunction)>::result_type>());
 }
 
-TEST(UnitTest_FunctionTraits, function_parameterCount)
+TEST(UnitTest_function_traits, function_parameterCount)
 {
     auto parameterCount = function_traits<decltype(&testFunction)>::arity;
 
     EXPECT_EQ(3, parameterCount);
 }
 
-TEST(UnitTest_FunctionTraits, function_parameter)
+TEST(UnitTest_function_traits, function_parameter)
 {
     using T = decltype(&testFunction);
 
@@ -190,7 +190,7 @@ namespace
     };
 }
 
-TEST(UnitTest_FunctionTraits, memberFunction_returnType)
+TEST(UnitTest_function_traits, memberFunction_returnType)
 {
     auto&& testClass = TestClass();
 
@@ -199,14 +199,14 @@ TEST(UnitTest_FunctionTraits, memberFunction_returnType)
     EXPECT_THAT(result, testing::A<function_traits<decltype(&TestClass::testFunction)>::result_type>());
 }
 
-TEST(UnitTest_FunctionTraits, memberFunction_parameterCount)
+TEST(UnitTest_function_traits, memberFunction_parameterCount)
 {
     auto parameterCount = function_traits<decltype(&TestClass::testFunction)>::arity;
 
     EXPECT_EQ(3, parameterCount);
 }
 
-TEST(UnitTest_FunctionTraits, memberFunction_parameter)
+TEST(UnitTest_function_traits, memberFunction_parameter)
 {
     using T = decltype(&TestClass::testFunction);
 
@@ -220,7 +220,7 @@ TEST(UnitTest_FunctionTraits, memberFunction_parameter)
     EXPECT_TRUE(param2) << "arg<2> is not a double";
 }
 
-TEST(UnitTest_FunctionTraits, constMemberFunction_returnType)
+TEST(UnitTest_function_traits, constMemberFunction_returnType)
 {
     auto&& testClass = TestClass();
 
@@ -229,14 +229,14 @@ TEST(UnitTest_FunctionTraits, constMemberFunction_returnType)
     EXPECT_THAT(result, testing::A<function_traits<decltype(&TestClass::testConstFunction)>::result_type>());
 }
 
-TEST(UnitTest_FunctionTraits, constMemberFunctionparameterCount)
+TEST(UnitTest_function_traits, constMemberFunctionparameterCount)
 {
     auto parameterCount = function_traits<decltype(&TestClass::testConstFunction)>::arity;
 
     EXPECT_EQ(3, parameterCount);
 }
 
-TEST(UnitTest_FunctionTraits, constMemberFunctionparameter)
+TEST(UnitTest_function_traits, constMemberFunctionparameter)
 {
     using T = decltype(&TestClass::testConstFunction);
 
@@ -248,4 +248,21 @@ TEST(UnitTest_FunctionTraits, constMemberFunctionparameter)
 
     auto param2 = std::is_same<double, function_traits<T>::arg<2>::type>::value;
     EXPECT_TRUE(param2) << "arg<2> is not a double";
+}
+
+
+TEST(UnitTest_function_traits, has_void_return_type_true)
+{
+    auto function = [] {};
+
+    const auto hasVoidRetType = jstd::has_void_return_type<decltype(function)>::value;
+    EXPECT_TRUE(hasVoidRetType);
+}
+
+TEST(UnitTest_function_traits, has_void_return_type_false)
+{
+    auto function = [] { return 10; };
+
+    const auto hasVoidRetType = jstd::has_void_return_type<decltype(function)>::value;
+    EXPECT_FALSE(hasVoidRetType);
 }

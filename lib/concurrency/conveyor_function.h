@@ -25,90 +25,75 @@
 #include "internal/conveyor_function_internal.h"
 
 #include <type_traits>
-#include <type_traits/function_traits.h>
 
 namespace jstd
 {
     template <typename ForwardT>
-    class conveyor_forwarder;
-
-
-    template<typename T>
-    using conveyor_consumer = std::function<void(T&&)>;
-
-    template<typename T>
-    using conveyor_producer = std::function<void(conveyor_forwarder<T>&)>;
-
-
-    template <typename ForwardT>
     class conveyor_forwarder
     {
     public:
-        explicit conveyor_forwarder(internal::conveyor_forwarder<ForwardT>& forwarder)
+        virtual ~conveyor_forwarder() = default;
+
+        virtual void push(ForwardT&& forwardValue) = 0;
+        virtual void push(const ForwardT& forwardValue) = 0;
+    };
+
+    template <typename ForwardT, typename ConsumerT>
+    class conveyor_forwarder_impl : public jstd::conveyor_forwarder<ForwardT>
+    {
+    public:
+        explicit conveyor_forwarder_impl(internal::conveyor<ForwardT, ConsumerT>& forwarder)
             : _forwarder(forwarder)
         {
         }
 
-        void push(ForwardT&& forwardValue)
+        virtual ~conveyor_forwarder_impl() = default;
+
+        void push(ForwardT&& forwardValue) override
         {
             _forwarder.push(std::move(forwardValue));
         }
 
-        template<typename T = ForwardT>
-        void push(const T& forwardValue,
-                  typename std::enable_if<std::is_copy_constructible<T>::value>::type* = 0)
+        void push(const ForwardT& forwardValue) override
         {
-            _forwarder.push(std::move(forwardValue));
+            static_assert(std::is_copy_constructible<ForwardT>::value,
+                          "Pushing a non copyable type by reference is not supported. Consider using std::move.");
+            _forwarder.push(forwardValue);
         }
 
     private:
-        internal::conveyor_forwarder<ForwardT>& _forwarder;
+        internal::conveyor<ForwardT, ConsumerT>& _forwarder;
     };
-
-
-    namespace internal
-    {
-        template<typename ForwardT>
-        void conveyor_function(conveyor_producer<ForwardT>&& producer, conveyor_consumer<ForwardT>&& consumer)
-        {
-            static_assert(std::is_move_constructible<ForwardT>::value,
-                          "The template parameter is not move constructable. "
-                                  "If this type cannot be made move constructable use std::unique_ptr<T>.");
-
-            auto&& internalForwarder =
-                    internal::conveyor_forwarder<ForwardT>(std::forward<conveyor_consumer<ForwardT>>(consumer));
-
-            try
-            {
-                auto&& forwarder = jstd::conveyor_forwarder<ForwardT>(internalForwarder);
-                producer(forwarder);
-            }
-            catch (...)
-            {
-                internalForwarder.finish();
-                throw;
-            }
-
-            internalForwarder.finish();
-            internalForwarder.checkForError();
-        }
-
-    } // internal
 
     template <typename ProducerT,
               typename ConsumerT,
-              typename ForwardT = typename std::decay<typename function_traits<ConsumerT>::template arg<0>::type>::type >
+              typename ForwardT = typename internal::consumer_variable<ConsumerT>::type >
     void conveyor_function(ProducerT&& producer, ConsumerT&& consumer)
     {
-        internal::conveyor_function<ForwardT>(std::forward<ProducerT>(producer), std::forward<ConsumerT>(consumer));
-    };
+        static_assert(internal::is_consumer<ConsumerT>::value,
+                      "The consumer signature is invalid. Expected: 'void(ForwardType&&)'");
+        static_assert(internal::is_producer<ProducerT, conveyor_forwarder<ForwardT>&>::value,
+                      "The producer signature is invalid. Expected: 'void(conveyor_forwarder<ForwardType>&)'");
+        static_assert(std::is_move_constructible<ForwardT>::value,
+                      "The template parameter is not move constructable. "
+                      "If this type cannot be made move constructable use std::unique_ptr<T>.");
 
-    template <typename ProducerT,
-            typename ConsumerT,
-            typename ForwardT = typename std::decay<typename function_traits<ConsumerT>::template arg<0>::type>::type >
-    void conveyor_function(const ProducerT& producer, const ConsumerT& consumer)
-    {
-        internal::conveyor_function<ForwardT>(producer, consumer);
+
+        auto&& conveyor = internal::conveyor<ForwardT, ConsumerT>(std::forward<ConsumerT>(consumer));
+
+        try
+        {
+            auto&& forwarder = conveyor_forwarder_impl<ForwardT, ConsumerT>(conveyor);
+            producer(forwarder);
+        }
+        catch (...)
+        {
+            conveyor.finish();
+            throw;
+        }
+
+        conveyor.finish();
+        conveyor.checkForError();
     };
 
 } // jstd

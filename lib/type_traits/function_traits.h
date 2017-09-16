@@ -80,4 +80,8 @@ namespace jstd
     template<class F>
     struct function_traits<F&&> : public function_traits<F>
     {};
+
+    template <typename T>
+    struct has_void_return_type : public std::is_void<typename function_traits<T>::result_type>
+    {};
 }

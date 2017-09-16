@@ -50,7 +50,7 @@ TEST(UnitTest_conveyor_function, copyFirstFunctions)
 {
     auto&& results = std::vector<std::string>();
 
-    auto producer = [](jstd::conveyor_forwarder<std::string>& forwarder)
+    const auto producer = [](jstd::conveyor_forwarder<std::string>& forwarder)
     {
         forwarder.push("value1"s);
         forwarder.push("value2"s);
@@ -164,4 +164,89 @@ TEST(UnitTest_conveyor_function, consumerThrowsWhileWaiting)
     };
 
     EXPECT_THROW(jstd::conveyor_function(std::move(producer), std::move(consumer)), TestException);
+}
+
+
+TEST(UnitTest_conveyor_function, is_consumer)
+{
+    auto function = [](std::string&&) {};
+    const auto isConsumer = jstd::internal::is_consumer<decltype(function)>::value;
+    EXPECT_TRUE(isConsumer);
+}
+
+TEST(UnitTest_conveyor_function, is_consumer_wrongReturnType)
+{
+    auto function = [](std::string&&) { return 12; };
+    const auto isConsumer = jstd::internal::is_consumer<decltype(function)>::value;
+    EXPECT_FALSE(isConsumer);
+}
+
+TEST(UnitTest_conveyor_function, is_consumer_wrongNumberOfParameters)
+{
+    auto function = [](std::string&&, int, long) {};
+    const auto isConsumer = jstd::internal::is_consumer<decltype(function)>::value;
+    EXPECT_FALSE(isConsumer);
+}
+
+TEST(UnitTest_conveyor_function, is_consumer_notRvalueRef)
+{
+    auto function = [](std::string) {};
+    const auto isConsumer = jstd::internal::is_consumer<decltype(function)>::value;
+    EXPECT_FALSE(isConsumer);
+}
+
+TEST(UnitTest_conveyor_function, is_producer)
+{
+    auto function = [](jstd::conveyor_forwarder<std::string>& forwarder) {};
+    const auto isProducer =
+            jstd::internal::is_producer<decltype(function),jstd::conveyor_forwarder<std::string>&>::value;
+    EXPECT_TRUE(isProducer);
+}
+
+TEST(UnitTest_conveyor_function, is_producer_wrongReturnType)
+{
+    auto function = [](jstd::conveyor_forwarder<std::string>& forwarder) { return 22; };
+    const auto isProducer =
+            jstd::internal::is_producer<decltype(function), jstd::conveyor_forwarder<std::string>&>::value;
+    EXPECT_FALSE(isProducer);
+}
+
+TEST(UnitTest_conveyor_function, is_producer_wrongNumberOfParameters)
+{
+    auto function = [](jstd::conveyor_forwarder<std::string>& forwarder, int, long) {};
+    const auto isProducer =
+            jstd::internal::is_producer<decltype(function),jstd::conveyor_forwarder<std::string>&>::value;
+    EXPECT_FALSE(isProducer);
+}
+
+TEST(UnitTest_conveyor_function, is_producer_wrongParameterType)
+{
+    auto function = [](std::string& forwarder) {};
+    const auto isProducer =
+            jstd::internal::is_producer<decltype(function), jstd::conveyor_forwarder<std::string>&>::value;
+    EXPECT_FALSE(isProducer);
+}
+
+TEST(UnitTest_conveyor_function, is_producer_wrongParameterTemplateType)
+{
+    auto function = [](jstd::conveyor_forwarder<int>& forwarder) {};
+    const auto isProducer =
+            jstd::internal::is_producer<decltype(function), jstd::conveyor_forwarder<std::string>&>::value;
+    EXPECT_FALSE(isProducer);
+}
+
+TEST(UnitTest_conveyor_function, is_producer_parameterNotReference)
+{
+    auto function = [](jstd::conveyor_forwarder<std::string>&& forwarder) {};
+    const auto isProducer =
+            jstd::internal::is_producer<decltype(function), jstd::conveyor_forwarder<std::string>&>::value;
+    EXPECT_FALSE(isProducer);
+}
+
+TEST(UnitTest_conveyor_function, is_producer_parameterIsConstRef)
+{
+    auto function = [](const jstd::conveyor_forwarder<std::string>& forwarder) {};
+    const auto isProducer =
+            jstd::internal::is_producer<decltype(function),jstd::conveyor_forwarder<std::string>&>::value;
+    EXPECT_FALSE(isProducer);
 }
