@@ -18,6 +18,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "internal", "internal", "{AC
 		lib\concurrency\internal\conveyor_function_internal.h = lib\concurrency\internal\conveyor_function_internal.h
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "type_traits", "type_traits", "{0BAD18CB-1FF2-4CD7-AF44-52D4FA61BA12}"
+	ProjectSection(SolutionItems) = preProject
+		lib\type_traits\function_traits.h = lib\type_traits\function_traits.h
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -41,5 +46,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{39346FCF-DCF5-48CF-8D2F-67997464D97F} = {55085524-66B0-4E2A-9F39-1DAAFEF1620B}
 		{AC3DBC88-2EB4-4AE2-9F8C-2943F5F342BA} = {39346FCF-DCF5-48CF-8D2F-67997464D97F}
+		{0BAD18CB-1FF2-4CD7-AF44-52D4FA61BA12} = {55085524-66B0-4E2A-9F39-1DAAFEF1620B}
 	EndGlobalSection
 EndGlobal

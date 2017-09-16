@@ -34,5 +34,8 @@
     <ClCompile Include="Source\ConveyorFunctionTestCase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\FunctionTraitsTestCase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

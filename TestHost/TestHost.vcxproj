@@ -184,6 +184,7 @@
   <ItemGroup>
     <ClCompile Include="Source\ConveyorFunctionTestCase.cpp" />
     <ClCompile Include="Source\ConveyorTestCase.cpp" />
+    <ClCompile Include="Source\FunctionTraitsTestCase.cpp" />
     <ClCompile Include="Source\main.cpp" />
     <ClCompile Include="Source\PerformanceCounter.cpp" />
     <ClCompile Include="Source\stdafx.cpp">
