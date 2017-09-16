@@ -31,8 +31,36 @@ namespace jstd
     struct function_traits : public function_traits<decltype(&T::operator())>
     {};
 
+    template <typename ReturnType, typename... Args>
+    struct function_traits<ReturnType(*)(Args...)>
+    {
+        enum { arity = sizeof...(Args) };
+
+        using result_type = ReturnType;
+
+        template <size_t i>
+        struct arg
+        {
+            using type = typename std::tuple_element<i, std::tuple<Args...>>::type;
+        };
+    };
+
     template <typename ClassType, typename ReturnType, typename... Args>
     struct function_traits<ReturnType(ClassType::*)(Args...) const>
+    {
+        enum { arity = sizeof...(Args) };
+
+        using result_type = ReturnType;
+
+        template <size_t i>
+        struct arg
+        {
+            using type = typename std::tuple_element<i, std::tuple<Args...>>::type;
+        };
+    };
+
+    template <typename ClassType, typename ReturnType, typename... Args>
+    struct function_traits<ReturnType(ClassType::*)(Args...)>
     {
         enum { arity = sizeof...(Args) };
 
