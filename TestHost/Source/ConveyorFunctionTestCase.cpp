@@ -9,18 +9,18 @@ TEST(UnitTest_conveyor_function, pushByMove)
 {
     auto&& results = std::vector<std::string>();
 
-    jstd::conveyor_function<std::string>([](jstd::conveyor_forwarder<std::string>& forwarder)
-                                         {
-                                             forwarder.push("value1"s);
-                                             forwarder.push("value2"s);
-                                             forwarder.push("value3"s);
-                                             forwarder.push("value4"s);
-                                             forwarder.push("value5"s);
-                                         },
-                                         [&](auto&& value)
-                                         {
-                                             results.push_back(std::move(value));
-                                         });
+    jstd::conveyor_function([](jstd::conveyor_forwarder<std::string>& forwarder)
+                            {
+                                forwarder.push("value1"s);
+                                forwarder.push("value2"s);
+                                forwarder.push("value3"s);
+                                forwarder.push("value4"s);
+                                forwarder.push("value5"s);
+                            },
+                            [&](std::string&& value)
+                            {
+                                results.push_back(std::move(value));
+                            });
 
 
 
@@ -33,17 +33,15 @@ TEST(UnitTest_conveyor_function, pushByCopy)
 
     auto&& values = std::vector<std::string>{ "value1"s, "value2"s, "value3"s, "value4"s, "value5"s };
 
-    jstd::conveyor_function<std::string>([&](jstd::conveyor_forwarder<std::string>& forwarder)
-                                         {
-                                             for (const auto& value : values)
-                                                forwarder.push(value);
-                                         },
-                                         [&](auto&& value)
-                                         {
-                                             results.push_back(std::move(value));
-                                         });
-
-
+    jstd::conveyor_function([&](jstd::conveyor_forwarder<std::string>& forwarder)
+                            {
+                                for (const auto& value : values)
+                                    forwarder.push(value);
+                            },
+                            [&](std::string&& value)
+                            {
+                                results.push_back(std::move(value));
+                            });
 
     EXPECT_THAT(results, ElementsAre("value1"s, "value2"s, "value3"s, "value4"s, "value5"s));
 }
@@ -58,13 +56,12 @@ TEST(UnitTest_conveyor_function, copyFirstFunctions)
         forwarder.push("value2"s);
         forwarder.push("value3"s);
     };
-    jstd::conveyor_function<std::string>(producer,
-                                         [&](auto&& value)
-                                         {
-                                             results.push_back(std::move(value));
-                                         });
 
-
+    jstd::conveyor_function(producer,
+                            [&](std::string&& value)
+                            {
+                                results.push_back(std::move(value));
+                            });
 
     EXPECT_THAT(results, ElementsAre("value1"s, "value2"s, "value3"s));
 }
@@ -73,15 +70,15 @@ TEST(UnitTest_conveyor_function, copySecondFunctions)
 {
     auto&& results = std::vector<std::string>();
 
-    auto processor = [&](auto&& value) { results.push_back(std::move(value)); };
+    auto consumer = [&](std::string&& value) { results.push_back(std::move(value)); };
 
-    jstd::conveyor_function<std::string>([](auto& forwarder)
-                                         {
-                                             forwarder.push("value1"s);
-                                             forwarder.push("value2"s);
-                                             forwarder.push("value3"s);
-                                         },
-                                         processor);
+    jstd::conveyor_function([](jstd::conveyor_forwarder<std::string>& forwarder)
+                            {
+                                forwarder.push("value1"s);
+                                forwarder.push("value2"s);
+                                forwarder.push("value3"s);
+                            },
+                            consumer);
 
     EXPECT_THAT(results, ElementsAre("value1"s, "value2"s, "value3"s));
 }
@@ -90,16 +87,15 @@ TEST(UnitTest_conveyor_function, copyBothFunctions)
 {
     auto&& results = std::vector<std::string>();
 
-    auto producer = [](auto& forwarder)
+    auto producer = [](jstd::conveyor_forwarder<std::string>& forwarder)
     {
         forwarder.push("value1"s);
         forwarder.push("value2"s);
         forwarder.push("value3"s);
     };
-    auto processor = [&](auto&& value) { results.push_back(std::move(value)); };
+    auto consumer = [&](std::string&& value) { results.push_back(std::move(value)); };
 
-    jstd::conveyor_function<std::string>(producer,
-                                         processor);
+    jstd::conveyor_function(producer, consumer);
 
     EXPECT_THAT(results, ElementsAre("value1"s, "value2"s, "value3"s));
 }
@@ -117,48 +113,48 @@ TEST(UnitTest_conveyor_function, producerThrows)
 {
     auto&& results = std::vector<std::string>();
 
-    auto producer = [](auto& forwarder)
+    auto producer = [](jstd::conveyor_forwarder<std::string>& forwarder)
     {
         forwarder.push("value1"s);
         forwarder.push("value2"s);
         throw TestException();
     };
 
-    auto processor = [&](auto&& value) { results.push_back(std::move(value)); };
+    auto consumer = [&](std::string&& value) { results.push_back(std::move(value)); };
 
-    EXPECT_THROW(jstd::conveyor_function<std::string>(std::move(producer), std::move(processor)), TestException);
+    EXPECT_THROW(jstd::conveyor_function(std::move(producer), std::move(consumer)), TestException);
 }
 
-TEST(UnitTest_conveyor_function, processorThrowsWhileProducing)
+TEST(UnitTest_conveyor_function, consumerThrowsWhileProducing)
 {
     std::atomic_int processed(0);
 
-    auto producer = [&](auto& forwarder)
+    auto producer = [&](jstd::conveyor_forwarder<std::string>& forwarder)
     {
         while(processed < 20)
             forwarder.push("value"s);
     };
 
-    auto processor = [&](auto&& value)
+    auto consumer = [&](std::string&& value)
     {
         if (processed++ > 10)
             throw TestException();
     };
 
-    EXPECT_THROW(jstd::conveyor_function<std::string>(std::move(producer), std::move(processor)), TestException);
+    EXPECT_THROW(jstd::conveyor_function(std::move(producer), std::move(consumer)), TestException);
 }
 
-TEST(UnitTest_conveyor_function, processorThrowsWhileWaiting)
+TEST(UnitTest_conveyor_function, consumerThrowsWhileWaiting)
 {
     std::atomic_int processed(0);
 
-    auto producer = [&](auto& forwarder)
+    auto producer = [&](jstd::conveyor_forwarder<std::string>& forwarder)
     {
         for(; processed < 30; ++processed)
             forwarder.push("value"s);
     };
 
-    auto processor = [&](auto&& value)
+    auto consumer = [&](std::string&& value)
     {
         if (processed >= 30)
         {
@@ -167,5 +163,5 @@ TEST(UnitTest_conveyor_function, processorThrowsWhileWaiting)
         }
     };
 
-    EXPECT_THROW(jstd::conveyor_function<std::string>(std::move(producer), std::move(processor)), TestException);
+    EXPECT_THROW(jstd::conveyor_function(std::move(producer), std::move(consumer)), TestException);
 }
