@@ -13,6 +13,7 @@
 		7D2ECDE71F658C430020DB0B /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7D2ECDE31F658C430020DB0B /* main.cpp */; };
 		7D2ECDEB1F658D790020DB0B /* libgmock.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7D2ECDE91F658D790020DB0B /* libgmock.a */; };
 		7D2ECDEC1F658D790020DB0B /* libgtest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7D2ECDEA1F658D790020DB0B /* libgtest.a */; };
+		7DC0C2721F6CD13A0088542F /* FunctionTraitsTestCase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 758A22EAA5C4553031450F8E /* FunctionTraitsTestCase.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -30,6 +31,7 @@
 /* Begin PBXFileReference section */
 		758A2099B3417447570E4E09 /* PerformanceCounter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PerformanceCounter.h; sourceTree = "<group>"; };
 		758A21B5E307A0A84749F482 /* PerformanceCounter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PerformanceCounter.cpp; sourceTree = "<group>"; };
+		758A22EAA5C4553031450F8E /* FunctionTraitsTestCase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FunctionTraitsTestCase.cpp; sourceTree = "<group>"; };
 		758A2DDFBFA4064DF53C6A34 /* ConveyorFunctionTestCase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ConveyorFunctionTestCase.cpp; sourceTree = "<group>"; };
 		7D2ECDE21F658C430020DB0B /* ConveyorTestCase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ConveyorTestCase.cpp; sourceTree = "<group>"; };
 		7D2ECDE31F658C430020DB0B /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
@@ -59,6 +61,7 @@
 				758A21B5E307A0A84749F482 /* PerformanceCounter.cpp */,
 				758A2099B3417447570E4E09 /* PerformanceCounter.h */,
 				758A2DDFBFA4064DF53C6A34 /* ConveyorFunctionTestCase.cpp */,
+				758A22EAA5C4553031450F8E /* FunctionTraitsTestCase.cpp */,
 			);
 			name = Source;
 			path = ../Source;
@@ -150,6 +153,7 @@
 				7D2ECDE61F658C430020DB0B /* ConveyorTestCase.cpp in Sources */,
 				758A238F14CAAE7E4742D2EA /* PerformanceCounter.cpp in Sources */,
 				758A2945A0E36FB9F19B8E96 /* ConveyorFunctionTestCase.cpp in Sources */,
+				7DC0C2721F6CD13A0088542F /* FunctionTraitsTestCase.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

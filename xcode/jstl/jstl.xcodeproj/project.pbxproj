@@ -7,12 +7,22 @@
 	objects = {
 
 /* Begin PBXFileReference section */
+		758A2B38540C3A2AF9455879 /* function_traits.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = function_traits.h; sourceTree = "<group>"; };
 		758A2E03C4B267A9DDA474D1 /* conveyor_function_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = conveyor_function_internal.h; sourceTree = "<group>"; };
 		758A2FD982D31DD58A7C8857 /* conveyor_function.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = conveyor_function.h; sourceTree = "<group>"; };
 		7D06AAD61F688DDE0010A12B /* conveyor.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.h; path = conveyor.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
+		758A24BDFB9238F590AEE564 /* type_traits */ = {
+			isa = PBXGroup;
+			children = (
+				758A2B38540C3A2AF9455879 /* function_traits.h */,
+			);
+			name = type_traits;
+			path = ../../lib/type_traits;
+			sourceTree = "<group>";
+		};
 		758A2D87C91DEB591F9FC8E1 /* internal */ = {
 			isa = PBXGroup;
 			children = (
@@ -25,6 +35,7 @@
 			isa = PBXGroup;
 			children = (
 				7D06AAD71F688DDE0010A12B /* concurrency */,
+				758A24BDFB9238F590AEE564 /* type_traits */,
 			);
 			sourceTree = "<group>";
 		};
