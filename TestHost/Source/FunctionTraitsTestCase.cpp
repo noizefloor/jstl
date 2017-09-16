@@ -39,13 +39,13 @@ TEST(UnitTest_FunctionTraits, lambda_parameter)
 
     using T = decltype(function);
 
-    auto param0 = std::is_same<int, function_traits<decltype(function)>::arg<0>::type>::value;
+    auto param0 = std::is_same<int, function_traits<T>::arg<0>::type>::value;
     EXPECT_TRUE(param0);
 
-    auto param1 = std::is_same<int, function_traits<decltype(function)>::arg<1>::type>::value;
+    auto param1 = std::is_same<int, function_traits<T>::arg<1>::type>::value;
     EXPECT_TRUE(param1);
 
-    auto param2 = std::is_same<long, function_traits<decltype(function)>::arg<2>::type>::value;
+    auto param2 = std::is_same<long, function_traits<T>::arg<2>::type>::value;
     EXPECT_TRUE(param2);
 }
 
@@ -114,13 +114,13 @@ TEST(UnitTest_FunctionTraits, std_function_parameter)
 
     using T = decltype(function);
 
-    auto param0 = std::is_same<int, function_traits<decltype(function)>::arg<0>::type>::value;
+    auto param0 = std::is_same<int, function_traits<T>::arg<0>::type>::value;
     EXPECT_TRUE(param0);
 
-    auto param1 = std::is_same<int, function_traits<decltype(function)>::arg<1>::type>::value;
+    auto param1 = std::is_same<int, function_traits<T>::arg<1>::type>::value;
     EXPECT_TRUE(param1);
 
-    auto param2 = std::is_same<long, function_traits<decltype(function)>::arg<2>::type>::value;
+    auto param2 = std::is_same<long, function_traits<T>::arg<2>::type>::value;
     EXPECT_TRUE(param2);
 }
 

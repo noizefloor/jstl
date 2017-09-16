@@ -10,6 +10,7 @@ link_directories( lib/linux )
 set(SOURCE_FILES
         Source/ConveyorTestCase.cpp
         Source/ConveyorFunctionTestCase.cpp
+        Source/FunctionTraitsTestCase.cpp
         Source/PerformanceCounter.cpp
         Source/main.cpp)
 
