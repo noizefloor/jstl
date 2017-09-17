@@ -25,48 +25,11 @@
 #include "internal/conveyor_function_internal.h"
 
 #include <type_traits>
+#include <memory>
 
 namespace jstd
 {
-    template <typename ForwardT>
-    class conveyor_forwarder
-    {
-    public:
-        virtual ~conveyor_forwarder() = default;
-
-        virtual void push(ForwardT&& forwardValue) = 0;
-        virtual void push(const ForwardT& forwardValue) = 0;
-    };
-
-    template <typename ForwardT, typename ConsumerT>
-    class conveyor_forwarder_impl : public jstd::conveyor_forwarder<ForwardT>
-    {
-    public:
-        explicit conveyor_forwarder_impl(internal::conveyor<ForwardT, ConsumerT>& forwarder)
-            : _forwarder(forwarder)
-        {
-        }
-
-        virtual ~conveyor_forwarder_impl() = default;
-
-        void push(ForwardT&& forwardValue) override
-        {
-            _forwarder.push(std::move(forwardValue));
-        }
-
-        void push(const ForwardT& forwardValue) override
-        {
-            static_assert(std::is_copy_constructible<ForwardT>::value,
-                          "Pushing a non copyable type by reference is not supported. Consider using std::move.");
-            _forwarder.push(forwardValue);
-        }
-
-    private:
-        internal::conveyor<ForwardT, ConsumerT>& _forwarder;
-    };
-
-    template <typename ProducerT,
-              typename ConsumerT,
+    template <typename ProducerT, typename ConsumerT,
               typename ForwardT = typename internal::consumer_variable<ConsumerT>::type >
     void conveyor_function(ProducerT&& producer, ConsumerT&& consumer)
     {
@@ -83,8 +46,7 @@ namespace jstd
 
         try
         {
-            auto&& forwarder = conveyor_forwarder_impl<ForwardT, ConsumerT>(conveyor);
-            producer(forwarder);
+            producer(conveyor.getForwarder());
         }
         catch (...)
         {
@@ -95,6 +57,55 @@ namespace jstd
         conveyor.finish();
         conveyor.checkForError();
     };
+
+    template <typename ConsumerT,
+              typename ForwardT = typename internal::consumer_variable<ConsumerT>::type,
+              typename ConveyorT = internal::conveyor<ForwardT, ConsumerT> >
+    std::unique_ptr<ConveyorT> make_conveyor(ConsumerT&& consumer)
+    {
+        return std::make_unique<ConveyorT>(std::forward<ConsumerT>(consumer));
+    };
+
+    template <typename ConverterT, typename... Args,
+              typename SourceT = typename internal::converter_source_variable<ConverterT>::type,
+              typename std::enable_if<!internal::is_consumer<ConverterT>::value, int>::type = 0 >
+    auto make_conveyor(ConverterT&& converter, Args... args)
+    {
+        auto&& conveyor = make_conveyor(args...);
+        auto& forwarder = conveyor->getForwarder();
+
+        auto&& consumer = [&forwarder, cv = std::forward<ConverterT>(converter)](SourceT&& value)
+        {
+            cv(std::move(value), forwarder);
+        };
+
+        auto&& resultConveyor = make_conveyor(std::move(consumer));
+        resultConveyor->setConveyorProxy(std::move(conveyor));
+
+        return std::move(resultConveyor);
+    };
+
+
+    template <typename ProducerT, typename ConverterT, typename... Args,
+              typename std::enable_if<!internal::is_consumer<ConverterT>::value, int>::type = 0 >
+    void conveyor_function(ProducerT&& producer, ConverterT&& converter, Args... args)
+    {
+
+        auto&& conveyor = make_conveyor(converter, args...);
+        try
+        {
+            producer(conveyor->getForwarder());
+        }
+        catch (...)
+        {
+            conveyor->finish();
+            throw;
+        }
+
+        conveyor->finish();
+        conveyor->checkForError();
+    };
+
 
 } // jstd
 

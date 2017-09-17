@@ -166,6 +166,88 @@ TEST(UnitTest_conveyor_function, consumerThrowsWhileWaiting)
     EXPECT_THROW(jstd::conveyor_function(std::move(producer), std::move(consumer)), TestException);
 }
 
+TEST(UnitTest_conveyor_function, pipeline_simple)
+{
+    auto results = std::vector<std::string>();
+
+    auto producer = [](jstd::conveyor_forwarder<std::string>& forwarder)
+    {
+        for (auto i = size_t(1); i <= 5; ++i)
+        {
+            auto&& stringProducer = std::string(i, 'A');
+            forwarder.push(std::move(stringProducer));
+        }
+    };
+
+    auto converter = [](std::string&& value, jstd::conveyor_forwarder<std::string>& forwarder)
+    {
+        value += "_B";
+        forwarder.push(std::move(value));
+    };
+
+    auto consumer = [&](std::string&& value)
+    {
+        results.push_back(std::move(value));
+    };
+
+    jstd::conveyor_function(producer, converter, consumer);
+
+    EXPECT_THAT(results, ElementsAre("A_B"s, "AA_B"s, "AAA_B"s, "AAAA_B"s, "AAAAA_B"s));
+}
+
+
+class StringProducer
+{
+public:
+    StringProducer(StringProducer&&) = default;
+    StringProducer& operator=(StringProducer&&) = default;
+
+    StringProducer(const StringProducer&) = default;
+    StringProducer& operator=(const StringProducer&) = default;
+
+    StringProducer(size_t count)
+        : _text(count, 'A')
+    {
+    }
+
+    std::string toString() const
+    {
+        return _text;
+    }
+
+private:
+    std::string _text;
+};
+
+TEST(UnitTest_conveyor_function, pipeline)
+{
+    auto results = std::vector<std::string>();
+
+    auto producer = [](jstd::conveyor_forwarder<StringProducer>& forwarder)
+    {
+        for (auto i = size_t(1); i <= 5; ++i)
+        {
+            auto&& stringProducer = StringProducer(i);
+            forwarder.push(std::move(stringProducer));
+        }
+    };
+
+    auto converter = [](StringProducer&& value, jstd::conveyor_forwarder<std::string>& forwarder)
+    {
+        auto forwardValue = value.toString();
+        forwarder.push(std::move(forwardValue));
+    };
+
+    auto consumer = [&](std::string&& value)
+    {
+        results.push_back(std::move(value));
+    };
+
+    jstd::conveyor_function(producer, converter, consumer);
+
+    EXPECT_THAT(results, ElementsAre("A"s, "AA"s, "AAA"s, "AAAA"s, "AAAAA"s));
+}
+
 
 TEST(UnitTest_conveyor_function, is_consumer)
 {
@@ -249,4 +331,21 @@ TEST(UnitTest_conveyor_function, is_producer_parameterIsConstRef)
     const auto isProducer =
             jstd::internal::is_producer<decltype(function),jstd::conveyor_forwarder<std::string>&>::value;
     EXPECT_FALSE(isProducer);
+}
+
+TEST(UnitTest_conveyor_function, conveyor_forwarder_type)
+{
+    using ActualType = jstd::internal::conveyor_forwarder_type<jstd::conveyor_forwarder<std::string> >::type;
+
+    const auto isString = std::is_same<ActualType, std::string>::value;
+    EXPECT_TRUE(isString);
+}
+
+
+TEST(UnitTest_conveyor_function, converter_target_variable)
+{
+    auto converter = [](std::vector<std::string>&&, jstd::conveyor_forwarder<std::string>&) {};
+    using TargetType = jstd::internal::converter_target_variable<decltype(converter)>::type;
+    const auto isString = std::is_same<TargetType, std::string>::value;
+    EXPECT_TRUE(isString);
 }
