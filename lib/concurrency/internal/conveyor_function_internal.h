@@ -26,7 +26,7 @@
 #include <mutex>
 #include <queue>
 #include <future>
-#import "../../type_traits/function_traits.h"
+#include "../../type_traits/function_traits.h"
 
 namespace jstd
 {
