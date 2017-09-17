@@ -29,43 +29,14 @@
 
 namespace jstd
 {
-    template <typename ProducerT, typename ConsumerT,
-              typename ForwardT = typename internal::consumer_variable<ConsumerT>::type >
-    void conveyor_function(ProducerT&& producer, ConsumerT&& consumer)
-    {
-        static_assert(internal::is_consumer<ConsumerT>::value,
-                      "The consumer signature is invalid. Expected: 'void(ForwardType&&)'");
-        static_assert(internal::is_producer<ProducerT, conveyor_forwarder<ForwardT>&>::value,
-                      "The producer signature is invalid. Expected: 'void(conveyor_forwarder<ForwardType>&)'");
-        static_assert(std::is_move_constructible<ForwardT>::value,
-                      "The template parameter is not move constructable. "
-                      "If this type cannot be made move constructable use std::unique_ptr<T>.");
-
-
-        auto&& conveyor = internal::conveyor<ForwardT, ConsumerT>(std::forward<ConsumerT>(consumer));
-
-        try
-        {
-            producer(conveyor.getForwarder());
-        }
-        catch (...)
-        {
-            conveyor.finish();
-            throw;
-        }
-
-        conveyor.finish();
-        conveyor.checkForError();
-    };
-
     template <typename ConsumerT,
-              typename ForwardT = typename internal::consumer_variable<ConsumerT>::type,
-              typename ConveyorT = internal::conveyor<ForwardT, ConsumerT> >
+              typename SourceT = typename conveyor_internal::consumer_type<ConsumerT>::source_type,
+              typename ConveyorT = conveyor_internal::conveyor<SourceT, ConsumerT> >
     std::unique_ptr<ConveyorT> make_conveyor(ConsumerT&& consumer)
     {
-        static_assert(internal::is_consumer<ConsumerT>::value,
+        static_assert(conveyor_internal::is_consumer<ConsumerT>::value,
                       "The consumer signature is invalid. Expected: 'void(ForwardType&&)'");
-        static_assert(std::is_move_constructible<ForwardT>::value,
+        static_assert(std::is_move_constructible<SourceT>::value,
                       "The template parameter is not move constructable. "
                       "If this type cannot be made move constructable use std::unique_ptr<T>.");
 
@@ -73,8 +44,8 @@ namespace jstd
     };
 
     template <typename ConverterT, typename... Args,
-              typename SourceT = typename internal::converter_source_variable<ConverterT>::type,
-              typename std::enable_if<!internal::is_consumer<ConverterT>::value, int>::type = 0 >
+              typename std::enable_if<!conveyor_internal::is_consumer<ConverterT>::value, int>::type = 0,
+              typename SourceT = typename conveyor_internal::converter_type<ConverterT>::source_type>
     auto make_conveyor(ConverterT&& converter, Args&&... args)
     {
         auto&& conveyor = make_conveyor(std::forward<Args>(args)...);
@@ -92,12 +63,11 @@ namespace jstd
     };
 
 
-    template <typename ProducerT, typename ConverterT, typename... Args,
-              typename std::enable_if<!internal::is_consumer<ConverterT>::value, int>::type = 0 >
-    void conveyor_function(ProducerT&& producer, ConverterT&& converter, Args&&... args)
+    template <typename ProducerT, typename ConverterOrConsumerT, typename... Args>
+    void conveyor_function(ProducerT&& producer, ConverterOrConsumerT&& converterOrConsumer, Args&&... args)
     {
-
-        auto&& conveyor = make_conveyor(converter, std::forward<Args>(args)...);
+        auto&& conveyor =
+                make_conveyor(std::forward<ConverterOrConsumerT>(converterOrConsumer), std::forward<Args>(args)...);
         try
         {
             producer(conveyor->getForwarder());

@@ -40,20 +40,19 @@ namespace jstd
         virtual void push(const ForwardT& forwardValue) = 0;
     };
 
-    namespace internal
+    namespace conveyor_internal
     {
         template <typename T>
-        using is_consumer = std::integral_constant
-                <bool, has_void_return_type<T>::value && function_traits<T>::arity == 1 &&
-                        std::is_rvalue_reference< typename function_traits<T>::template arg<0>::type >::value>;
-
-        template <typename T, typename ParameterT>
-        using is_producer = std::integral_constant
-                <bool, has_void_return_type<T>::value && function_traits<T>::arity == 1 &&
-                        std::is_same<ParameterT, typename function_traits<T>::template arg<0>::type>::value>;
+        struct is_conveyor_forwarder : public std::false_type {};
 
         template <typename T>
-        using consumer_variable = std::decay<typename function_traits<T>::template arg<0>::type>;
+        struct is_conveyor_forwarder<conveyor_forwarder<T> > : public std::true_type {};
+
+        template <typename T>
+        struct is_conveyor_forwarder<T&> : public is_conveyor_forwarder<T> {};
+
+        template <typename T>
+        struct is_conveyor_forwarder<T&&> : public is_conveyor_forwarder<T> {};
 
 
 
@@ -73,12 +72,39 @@ namespace jstd
         struct conveyor_forwarder_type<ValueT&&> : public conveyor_forwarder_type<ValueT> {};
 
 
-        template <typename T>
-        using converter_source_variable = consumer_variable<T>;
 
         template <typename T>
-        using converter_target_variable =
-            conveyor_forwarder_type< typename function_traits<T>::template arg<1>::type>;
+        using is_consumer = std::integral_constant
+                <bool, has_void_return_type<T>::value && function_traits<T>::arity == 1 &&
+                        std::is_rvalue_reference< typename function_traits<T>::template arg<0>::type >::value>;
+
+        template <typename T>
+        using is_producer = std::integral_constant
+                <bool, has_void_return_type<T>::value && function_traits<T>::arity == 1 &&
+                        std::is_lvalue_reference<typename function_traits<T>::template arg<0>::type>::value &&
+                        is_conveyor_forwarder<typename function_traits<T>::template arg<0>::type>::value >;
+
+
+        template <typename T,
+                  typename TargetT = typename conveyor_forwarder_type<typename function_traits<T>::template arg<0>::type>::type>
+        struct producer_type
+        {
+            using target_type = TargetT;
+        };
+
+        template <typename T,
+                  typename SourceT = typename std::decay<typename function_traits<T>::template arg<0>::type>::type>
+        struct consumer_type
+        {
+            using source_type = SourceT;
+        };
+
+        template <typename T,
+                  typename TargetT = typename conveyor_forwarder_type<typename function_traits<T>::template arg<1>::type>::type>
+        struct converter_type : public consumer_type<T>
+        {
+            using target_type = TargetT;
+        };
 
 
         class conveyor_proxy
@@ -97,7 +123,7 @@ namespace jstd
             class conveyor_forwarder_impl : public jstd::conveyor_forwarder<ForwardT>
             {
             public:
-                explicit conveyor_forwarder_impl(internal::conveyor<ForwardT, ConsumerT>& forwarder)
+                explicit conveyor_forwarder_impl(conveyor<ForwardT, ConsumerT>& forwarder)
                     : _forwarder(forwarder)
                 {
                 }
@@ -117,7 +143,7 @@ namespace jstd
                 }
 
             private:
-                internal::conveyor<ForwardT, ConsumerT>& _forwarder;
+                conveyor<ForwardT, ConsumerT>& _forwarder;
             };
 
         public:
