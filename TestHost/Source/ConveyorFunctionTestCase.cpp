@@ -243,7 +243,7 @@ TEST(UnitTest_conveyor_function, pipeline)
         results.push_back(std::move(value));
     };
 
-    jstd::conveyor_function(producer, converter, consumer);
+    jstd::conveyor_function(std::move(producer), std::move(converter), std::move(consumer));
 
     EXPECT_THAT(results, ElementsAre("A"s, "AA"s, "AAA"s, "AAAA"s, "AAAAA"s));
 }

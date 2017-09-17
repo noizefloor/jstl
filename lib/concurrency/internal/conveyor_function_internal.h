@@ -180,7 +180,6 @@ namespace jstd
             {
                 try
                 {
-                    _isRunning = true;
                     while (true)
                     {
                         std::unique_lock<std::mutex> lock(_mutex);
@@ -220,7 +219,6 @@ namespace jstd
             std::condition_variable _cv;
 
             std::atomic_bool _shouldFinish { false };
-            std::atomic_bool _isRunning { false };
 
             conveyor_forwarder_impl _forwarder;
             std::future<void> _consumerHandle;
