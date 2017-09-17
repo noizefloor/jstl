@@ -100,7 +100,9 @@ namespace jstd
         };
 
         template <typename T,
-                  typename TargetT = typename conveyor_forwarder_type<typename function_traits<T>::template arg<1>::type>::type>
+                  typename TargetT = typename std::conditional<function_traits<T>::arity >= 2,
+                          typename conveyor_forwarder_type<typename function_traits<T>::template arg<1>::type>::type,
+                          void>::type >
         struct converter_type : public consumer_type<T>
         {
             using target_type = TargetT;

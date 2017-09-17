@@ -44,8 +44,8 @@ namespace jstd
     };
 
     template <typename ConverterT, typename... Args,
-              typename std::enable_if<!conveyor_internal::is_consumer<ConverterT>::value, int>::type = 0,
-              typename SourceT = typename conveyor_internal::converter_type<ConverterT>::source_type>
+              typename SourceT = typename conveyor_internal::consumer_type<ConverterT>::source_type,
+              typename std::enable_if<!conveyor_internal::is_consumer<ConverterT>::value, int>::type = 0>
     auto make_conveyor(ConverterT&& converter, Args&&... args)
     {
         auto&& conveyor = make_conveyor(std::forward<Args>(args)...);
