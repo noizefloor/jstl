@@ -89,13 +89,13 @@ namespace jstd
         template<typename T>
         struct is_callable_impl
         {
-            typedef char yes_type[1];
-            typedef char no_type[2];
+            using yes_type =  char[1];
+            using no_type = char[2];
 
             template <typename Q>
             static yes_type& check(decltype(&Q::operator())*);
 
-            template <typename Q>
+            template <typename>
             static no_type& check(...);
 
             static const bool value = sizeof(check<T>(0))==sizeof(yes_type);
