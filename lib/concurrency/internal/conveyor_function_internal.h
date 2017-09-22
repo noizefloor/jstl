@@ -42,218 +42,103 @@ namespace jstd
 
     namespace conveyor_internal
     {
-        template <typename T>
-        struct is_conveyor_forwarder : public std::false_type {};
-
-        template <typename T>
-        struct is_conveyor_forwarder<conveyor_forwarder<T> > : public std::true_type {};
-
-        template <typename T>
-        struct is_conveyor_forwarder<T&> : public is_conveyor_forwarder<T> {};
-
-        template <typename T>
-        struct is_conveyor_forwarder<T&&> : public is_conveyor_forwarder<T> {};
-
-
-
-        template <typename ValueT>
-        struct conveyor_forwarder_type;
-
-        template <typename ValueT>
-        struct conveyor_forwarder_type<conveyor_forwarder<ValueT> >
+        enum class CallableType
         {
+            unknown = 0,
+            producer = 1,
+            converter,
+            consumer
+        };
+
+        struct no_callable_type
+        {
+            static const CallableType callable = CallableType::unknown;
+
+            using source_type = void;
+            using target_type = void;
+        };
+
+        template <typename T>
+        struct callable_type_impl : public callable_type_impl<decltype(&T::operator())> {};
+
+        template <typename ReturnType, typename ClassType, typename... Args>
+        struct callable_type_impl<ReturnType(ClassType::*)(Args...)>
+                : public callable_type_impl<ReturnType(Args...)> {};
+
+        template <typename ReturnType, typename ClassType, typename... Args>
+        struct callable_type_impl<ReturnType(ClassType::*)(Args...) const>
+                : public callable_type_impl<ReturnType(Args...)> {};
+
+        template <typename ReturnType, typename... Args>
+        struct callable_type_impl<ReturnType(*)(Args...)> : public callable_type_impl<ReturnType(Args...)> {};
+
+
+        template <typename ReturnType, typename... Args>
+        struct callable_type_impl<ReturnType(Args...)> : public no_callable_type
+        {};
+
+        template <typename T>
+        struct callable_type_impl<T&> : public callable_type_impl<T> {};
+
+        template <typename T>
+        struct callable_type_impl<T&&> : public callable_type_impl<T> {};
+
+        template <typename TargetType>
+        struct callable_type_impl<void(conveyor_forwarder<TargetType>&)>
+        {
+            static const CallableType callable = CallableType::producer;
+
+            using source_type = void;
+            using target_type = TargetType;
+        };
+
+        template <typename SourceType, typename TargetType>
+        struct callable_type_impl<void(SourceType&&, conveyor_forwarder<TargetType>&)>
+        {
+            static const CallableType callable = CallableType::converter;
+
+            using source_type = SourceType;
+            using target_type = TargetType;
+        };
+
+        template <typename SourceType>
+        struct callable_type_impl<void(SourceType&&)>
+        {
+            static const CallableType callable = CallableType::consumer;
+
+            using source_type = SourceType;
+            using target_type = void;
+        };
+
+        template <typename T, typename = void>
+        struct callable_type : public no_callable_type {};
+
+        template <typename T>
+        struct callable_type<T, typename std::enable_if<is_callable<T>::value>::type >
+                : public callable_type_impl<T> {};
+
+
+
+
+        template <typename ValueT>
+        struct forwarder_type
+        {
+            static const bool is_forwarder = false;
+            using type = void;
+        };
+
+        template <typename ValueT>
+        struct forwarder_type<conveyor_forwarder<ValueT> >
+        {
+            static const bool is_forwarder = true;
             using type = ValueT;
         };
 
         template <typename ValueT>
-        struct conveyor_forwarder_type<ValueT&> : public conveyor_forwarder_type<ValueT> {};
+        struct forwarder_type<ValueT&> : public forwarder_type<ValueT> {};
 
         template <typename ValueT>
-        struct conveyor_forwarder_type<ValueT&&> : public conveyor_forwarder_type<ValueT> {};
-
-
-
-        template <typename T>
-        using is_consumer = std::integral_constant
-                <bool, has_void_return_type<T>::value && function_traits<T>::arity == 1 &&
-                        std::is_rvalue_reference< typename function_traits<T>::template arg<0>::type >::value>;
-
-        template <typename T>
-        using is_producer = std::integral_constant
-                <bool, has_void_return_type<T>::value && function_traits<T>::arity == 1 &&
-                        std::is_lvalue_reference<typename function_traits<T>::template arg<0>::type>::value &&
-                        is_conveyor_forwarder<typename function_traits<T>::template arg<0>::type>::value >;
-
-
-        template <typename T,
-                  typename TargetT = typename conveyor_forwarder_type<typename function_traits<T>::template arg<0>::type>::type>
-        struct producer_type
-        {
-            using target_type = TargetT;
-        };
-
-        template <typename T,
-                  typename SourceT = typename std::decay<typename function_traits<T>::template arg<0>::type>::type>
-        struct consumer_type
-        {
-            using source_type = SourceT;
-        };
-
-        template <typename T,
-                  typename TargetT = typename std::conditional<function_traits<T>::arity >= 2,
-                          typename conveyor_forwarder_type<typename function_traits<T>::template arg<1>::type>::type,
-                          void>::type >
-        struct converter_type : public consumer_type<T>
-        {
-            using target_type = TargetT;
-        };
-
-
-        class conveyor_proxy
-        {
-        public:
-            virtual ~conveyor_proxy() = default;
-
-            virtual void finish() = 0;
-            virtual void checkForError() const = 0;
-        };
-
-
-        template<typename ForwardT, typename ConsumerT>
-        class conveyor : public conveyor_proxy
-        {
-            class conveyor_forwarder_impl : public jstd::conveyor_forwarder<ForwardT>
-            {
-            public:
-                explicit conveyor_forwarder_impl(conveyor<ForwardT, ConsumerT>& forwarder)
-                    : _forwarder(forwarder)
-                {
-                }
-
-                virtual ~conveyor_forwarder_impl() = default;
-
-                void push(ForwardT&& forwardValue) override
-                {
-                    _forwarder.push(std::move(forwardValue));
-                }
-
-                void push(const ForwardT& forwardValue) override
-                {
-                    static_assert(std::is_copy_constructible<ForwardT>::value,
-                                  "Pushing a non copyable type by reference is not supported. Consider using std::move.");
-                    _forwarder.push(forwardValue);
-                }
-
-            private:
-                conveyor<ForwardT, ConsumerT>& _forwarder;
-            };
-
-        public:
-            explicit conveyor(ConsumerT&& consumer)
-                : _consumer(std::forward<ConsumerT>(consumer))
-                , _forwarder(*this)
-                , _consumerHandle(std::async(std::launch::async, [this] { run(); }))
-            {
-            }
-
-            virtual ~conveyor() = default;
-
-            template<typename T>
-            void push(T&& forwardValue)
-            {
-                checkForError();
-
-                std::unique_lock<std::mutex> lock(_mutex);
-
-                _queue.push(std::forward<T>(forwardValue));
-
-                lock.unlock();
-                _cv.notify_one();
-            }
-
-            void finish() override
-            {
-                _shouldFinish = true;
-                _cv.notify_one();
-
-                if (_consumerHandle.valid())
-                    _consumerHandle.wait();
-
-                if (_proxy)
-                    _proxy->finish();
-            }
-
-            void checkForError() const override
-            {
-                if (_proxy)
-                    _proxy->checkForError();
-
-                if (_hasError)
-                    std::rethrow_exception(_error);
-            }
-
-            void setConveyorProxy(std::unique_ptr<conveyor_proxy>&& proxy)
-            {
-                _proxy = std::move(proxy);
-            }
-
-            conveyor_forwarder_impl& getForwarder()
-            {
-                return _forwarder;
-            }
-
-        private:
-
-            void run()
-            {
-                try
-                {
-                    while (true)
-                    {
-                        std::unique_lock<std::mutex> lock(_mutex);
-
-                        if (_queue.empty() && !_shouldFinish)
-                            _cv.wait(lock, [this]
-                            {
-                                return !_queue.empty() || _shouldFinish;
-                            });
-
-                        if (!_queue.empty())
-                        {
-                            auto value = std::move(_queue.front());
-                            _queue.pop();
-
-                            lock.unlock();
-
-                            _consumer(std::move(value));
-                        }
-                        else if (_shouldFinish)
-                            return;
-                    }
-                }
-                catch (...)
-                {
-                    _error = std::current_exception();
-                    _hasError = true;
-                }
-            }
-
-        private:
-            std::unique_ptr<conveyor_proxy> _proxy;
-            ConsumerT _consumer;
-
-            std::queue<ForwardT> _queue;
-            std::mutex _mutex;
-            std::condition_variable _cv;
-
-            std::atomic_bool _shouldFinish { false };
-
-            conveyor_forwarder_impl _forwarder;
-            std::future<void> _consumerHandle;
-
-            std::exception_ptr _error;
-            std::atomic_bool _hasError { false };
-        };
+        struct forwarder_type<ValueT&&> : public forwarder_type<ValueT> {};
 
     } // internal
 

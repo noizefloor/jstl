@@ -313,132 +313,97 @@ TEST(UnitTest_conveyor_function, pipeline_converter_throws)
     EXPECT_THROW(jstd::conveyor_function(producer, converter, consumer), TestException);
 }
 
-TEST(UnitTest_conveyor_function, is_consumer)
+TEST(UnitTest_conveyor_function, forwarder_type)
 {
-    auto function = [](std::string&&) {};
-    const auto isConsumer = jstd::conveyor_internal::is_consumer<decltype(function)>::value;
-    EXPECT_TRUE(isConsumer);
-}
+    using ForwarderType = jstd::conveyor_forwarder<std::string>;
 
-TEST(UnitTest_conveyor_function, is_consumer_wrongReturnType)
-{
-    auto function = [](std::string&&) { return 12; };
-    const auto isConsumer = jstd::conveyor_internal::is_consumer<decltype(function)>::value;
-    EXPECT_FALSE(isConsumer);
-}
+    const auto isForwarder = jstd::conveyor_internal::forwarder_type<ForwarderType>::is_forwarder;
+    EXPECT_TRUE(isForwarder);
 
-TEST(UnitTest_conveyor_function, is_consumer_wrongNumberOfParameters)
-{
-    auto function = [](std::string&&, int, long) {};
-    const auto isConsumer = jstd::conveyor_internal::is_consumer<decltype(function)>::value;
-    EXPECT_FALSE(isConsumer);
-}
-
-TEST(UnitTest_conveyor_function, is_consumer_notRvalueRef)
-{
-    auto function = [](std::string) {};
-    const auto isConsumer = jstd::conveyor_internal::is_consumer<decltype(function)>::value;
-    EXPECT_FALSE(isConsumer);
-}
-
-TEST(UnitTest_conveyor_function, is_producer)
-{
-    auto function = [](jstd::conveyor_forwarder<std::string>& forwarder) {};
-    const auto isProducer =
-            jstd::conveyor_internal::is_producer<decltype(function)>::value;
-    EXPECT_TRUE(isProducer);
-}
-
-TEST(UnitTest_conveyor_function, is_producer_wrongReturnType)
-{
-    auto function = [](jstd::conveyor_forwarder<std::string>& forwarder) { return 22; };
-    const auto isProducer =
-            jstd::conveyor_internal::is_producer<decltype(function)>::value;
-    EXPECT_FALSE(isProducer);
-}
-
-TEST(UnitTest_conveyor_function, is_producer_wrongNumberOfParameters)
-{
-    auto function = [](jstd::conveyor_forwarder<std::string>& forwarder, int, long) {};
-    const auto isProducer =
-            jstd::conveyor_internal::is_producer<decltype(function)>::value;
-    EXPECT_FALSE(isProducer);
-}
-
-TEST(UnitTest_conveyor_function, is_producer_wrongParameterType)
-{
-    auto function = [](std::string& forwarder) {};
-    const auto isProducer =
-            jstd::conveyor_internal::is_producer<decltype(function)>::value;
-    EXPECT_FALSE(isProducer);
-}
-
-TEST(UnitTest_conveyor_function, is_producer_parameterNotReference)
-{
-    auto function = [](jstd::conveyor_forwarder<std::string>&& forwarder) {};
-    const auto isProducer =
-            jstd::conveyor_internal::is_producer<decltype(function)>::value;
-    EXPECT_FALSE(isProducer);
-}
-
-TEST(UnitTest_conveyor_function, is_producer_parameterIsConstRef)
-{
-    auto function = [](const jstd::conveyor_forwarder<std::string>& forwarder) {};
-    const auto isProducer =
-            jstd::conveyor_internal::is_producer<decltype(function)>::value;
-    EXPECT_FALSE(isProducer);
-}
-
-TEST(UnitTest_conveyor_function, is_conveyor_forwarder)
-{
-    using ForwarderT = jstd::conveyor_forwarder<std::string>;
-
-    const auto isConveyorForwarder = jstd::conveyor_internal::is_conveyor_forwarder<ForwarderT>::value;
-    EXPECT_TRUE(isConveyorForwarder);
-
-    const auto isNotConveyorForwarder = jstd::conveyor_internal::is_conveyor_forwarder<std::string>::value;
-    EXPECT_FALSE(isNotConveyorForwarder);
-}
-
-TEST(UnitTest_conveyor_function, conveyor_forwarder_type)
-{
-    using ActualType = jstd::conveyor_internal::conveyor_forwarder_type<jstd::conveyor_forwarder<std::string> >::type;
-
+    using ActualType = jstd::conveyor_internal::forwarder_type<ForwarderType>::type;
     const auto isString = std::is_same<ActualType, std::string>::value;
     EXPECT_TRUE(isString);
 }
 
-TEST(UnitTest_conveyor_function, producer_type)
+TEST(UnitTest_conveyor_function, forwarder_type_wrongType)
 {
-    auto producer = [](jstd::conveyor_forwarder<std::string>&) {};
+    const auto isForwarder = jstd::conveyor_internal::forwarder_type<std::string>::is_forwarder;
+    EXPECT_FALSE(isForwarder);
 
-    using ProducerT = jstd::conveyor_internal::producer_type<decltype(producer)>;
-
-    const auto isTargetValid = std::is_same<ProducerT::target_type, std::string>::value;
-
-    EXPECT_TRUE(isTargetValid) << "converter_type::target is not std::string";
+    using ActualType = jstd::conveyor_internal::forwarder_type<std::string>::type;
+    const auto isString = std::is_same<ActualType, std::string>::value;
+    EXPECT_FALSE(isString);
 }
 
-TEST(UnitTest_conveyor_function, consumer_type)
+TEST(UnitTest_conveyor_function, callable_type_unknown_lambda)
 {
-    auto consumer = [](std::vector<std::string>&&) {};
+    auto input = [](std::string&) {};
 
-    using ConsumerT = jstd::conveyor_internal::consumer_type<decltype(consumer)>;
+    using CallableType = jstd::conveyor_internal::callable_type<decltype(input)>;
 
-    const auto isSourceValid = std::is_same<ConsumerT::source_type, std::vector<std::string>>::value;
+    const auto callableType = CallableType::callable;
+    EXPECT_EQ(jstd::conveyor_internal::CallableType::unknown, callableType);
+}
 
+TEST(UnitTest_conveyor_function, callable_type_unknown_variable)
+{
+    auto input = std::string();
+
+    using CallableType = jstd::conveyor_internal::callable_type<decltype(input)>;
+
+    const auto callableType = CallableType::callable;
+    EXPECT_EQ(jstd::conveyor_internal::CallableType::unknown, callableType);
+}
+
+TEST(UnitTest_conveyor_function, callable_type_unknown_return_type)
+{
+    auto input = [](jstd::conveyor_forwarder<std::string>&) { return 0; };
+
+    using CallableType = jstd::conveyor_internal::callable_type<decltype(input)>;
+
+    const auto callableType = CallableType::callable;
+    EXPECT_EQ(jstd::conveyor_internal::CallableType::unknown, callableType);
+}
+
+TEST(UnitTest_conveyor_function, callable_type_producer)
+{
+    auto input = [](jstd::conveyor_forwarder<std::string>&) {};
+
+    using CallableType = jstd::conveyor_internal::callable_type<decltype(input)>;
+
+    const auto callableType = CallableType::callable;
+    EXPECT_EQ(jstd::conveyor_internal::CallableType::producer, callableType);
+
+    const auto isTargetValid = std::is_same<CallableType::target_type, std::string >::value;
+    EXPECT_TRUE(isTargetValid) << "converter_type::source is not std::string";
+}
+
+TEST(UnitTest_conveyor_function, callable_type_converter)
+{
+    auto input = [](std::vector<std::string>&&, jstd::conveyor_forwarder<std::string>&) {};
+
+    using CallableType = jstd::conveyor_internal::callable_type<decltype(input)>;
+
+    const auto callableType = CallableType::callable;
+    EXPECT_EQ(jstd::conveyor_internal::CallableType::converter, callableType);
+
+    const auto isSourceValid = std::is_same<CallableType::source_type, std::vector<std::string> >::value;
+    EXPECT_TRUE(isSourceValid) << "converter_type::source is not std::vector<std::string>";
+
+    const auto isTargetValid = std::is_same<CallableType::target_type, std::string >::value;
+    EXPECT_TRUE(isTargetValid) << "converter_type::source is not std::string";
+}
+
+TEST(UnitTest_conveyor_function, callable_type_consumer)
+{
+    auto input = [](std::vector<std::string>&&) {};
+
+    using CallableType = jstd::conveyor_internal::callable_type<decltype(input)>;
+
+    const auto callableType = CallableType::callable;
+    EXPECT_EQ(jstd::conveyor_internal::CallableType::consumer, callableType);
+
+    const auto isSourceValid = std::is_same<CallableType::source_type, std::vector<std::string> >::value;
     EXPECT_TRUE(isSourceValid) << "converter_type::source is not std::vector<std::string>";
 }
 
-TEST(UnitTest_conveyor_function, converter_type)
-{
-    auto converter = [](std::vector<std::string>&&, jstd::conveyor_forwarder<std::string>&) {};
-
-    using ConverterT = jstd::conveyor_internal::converter_type<decltype(converter)>;
-
-    const auto isSourceValid = std::is_same<ConverterT::source_type, std::vector<std::string>>::value;
-    const auto isTargetValid = std::is_same<ConverterT::target_type, std::string>::value;
-
-    EXPECT_TRUE(isSourceValid) << "converter_type::source is not std::vector<std::string>";
-    EXPECT_TRUE(isTargetValid) << "converter_type::target is not std::string";
-}

@@ -82,6 +82,41 @@ namespace jstd
     {};
 
     template <typename T>
-    struct has_void_return_type : public std::is_void<typename function_traits<T>::result_type>
-    {};
+    using has_void_return_type = std::is_void<typename function_traits<T>::result_type>;
+
+    namespace internal
+    {
+        template<typename T>
+        struct is_callable_impl
+        {
+            typedef char yes_type[1];
+            typedef char no_type[2];
+
+            template <typename Q>
+            static yes_type& check(decltype(&Q::operator())*);
+
+            template <typename Q>
+            static no_type& check(...);
+
+            static const bool value = sizeof(check<T>(0))==sizeof(yes_type);
+        };
+
+        template<typename R, typename... Args>
+        struct is_callable_impl<R (*)(Args...)> : std::true_type {};
+
+        template<typename R, typename C, typename... Args>
+        struct is_callable_impl<R (C::*)(Args...)> : std::true_type {};
+
+        template<typename R, typename C, typename... Args>
+        struct is_callable_impl<R (C::*)(Args...) const> : std::true_type {};
+
+        template<typename T>
+        struct is_callable_impl<T&> : public is_callable_impl<T> {};
+
+        template<typename T>
+        struct is_callable_impl<T&&> : public is_callable_impl<T> {};
+    }
+
+    template<typename T>
+    using is_callable = std::integral_constant<bool, internal::is_callable_impl<T>::value>;
 }

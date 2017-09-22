@@ -266,3 +266,62 @@ TEST(UnitTest_function_traits, has_void_return_type_false)
     const auto hasVoidRetType = jstd::has_void_return_type<decltype(function)>::value;
     EXPECT_FALSE(hasVoidRetType);
 }
+
+TEST(UnitTest_function_traits, is_callable_lambda_lvalue)
+{
+    auto function = [] { return 10; };
+
+    const auto isCallable = jstd::is_callable<decltype(function)>::value;
+    EXPECT_TRUE(isCallable);
+}
+
+TEST(UnitTest_function_traits, is_callable_lambda_lvalue_reference)
+{
+    auto function = [] { return 10; };
+    auto& functionRef = function;
+
+    const auto isCallable = jstd::is_callable<decltype(functionRef)>::value;
+    EXPECT_TRUE(isCallable);
+}
+
+TEST(UnitTest_function_traits, is_callable_lambda_const_lvalue_reference)
+{
+    auto function = [] { return 10; };
+    const auto& functionRef = function;
+
+    const auto isCallable = jstd::is_callable<decltype(functionRef)>::value;
+    EXPECT_TRUE(isCallable);
+}
+
+TEST(UnitTest_function_traits, is_callable_lambda_rvalue_reference)
+{
+    auto function = [] { return 10; };
+    auto&& functionRef = function;
+
+    const auto isCallable = jstd::is_callable<decltype(functionRef)>::value;
+    EXPECT_TRUE(isCallable);
+}
+
+TEST(UnitTest_function_traits, is_callable_function)
+{
+    const auto isCallable = jstd::is_callable<decltype(&testFunction)>::value;
+    EXPECT_TRUE(isCallable);
+}
+
+TEST(UnitTest_function_traits, is_callable_member_function)
+{
+    const auto isCallable = jstd::is_callable<decltype(&TestClass::testFunction)>::value;
+    EXPECT_TRUE(isCallable);
+}
+
+TEST(UnitTest_function_traits, is_callable_member_function_const)
+{
+    const auto isCallable = jstd::is_callable<decltype(&TestClass::testConstFunction)>::value;
+    EXPECT_TRUE(isCallable);
+}
+
+TEST(UnitTest_function_traits, is_callable_not_a_function)
+{
+    const auto isCallable = jstd::is_callable<std::string>::value;
+    EXPECT_FALSE(isCallable);
+}
