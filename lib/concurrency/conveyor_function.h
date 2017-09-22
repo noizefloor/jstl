@@ -40,38 +40,38 @@ namespace jstd
             virtual void checkForError() const = 0;
         };
 
-        template<typename ForwardT, typename ConsumerT>
+        template<typename T, typename Callable>
         class conveyor : public conveyor_proxy
         {
-            class conveyor_forwarder_impl : public jstd::conveyor_forwarder<ForwardT>
+            class conveyor_forwarder_impl : public jstd::conveyor_forwarder<T>
             {
             public:
-                explicit conveyor_forwarder_impl(conveyor<ForwardT, ConsumerT>& forwarder)
+                explicit conveyor_forwarder_impl(conveyor<T, Callable>& forwarder)
                         : _forwarder(forwarder)
                 {
                 }
 
                 virtual ~conveyor_forwarder_impl() = default;
 
-                void push(ForwardT&& forwardValue) override
+                void push(T&& forwardValue) override
                 {
                     _forwarder.push(std::move(forwardValue));
                 }
 
-                void push(const ForwardT& forwardValue) override
+                void push(const T& forwardValue) override
                 {
-                    static_assert(std::is_copy_constructible<ForwardT>::value,
+                    static_assert(std::is_copy_constructible<T>::value,
                                   "Pushing a non copyable type by reference is not supported. Consider using std::move.");
                     _forwarder.push(forwardValue);
                 }
 
             private:
-                conveyor<ForwardT, ConsumerT>& _forwarder;
+                conveyor<T, Callable>& _forwarder;
             };
 
         public:
-            explicit conveyor(ConsumerT&& consumer)
-                    : _consumer(std::forward<ConsumerT>(consumer))
+            explicit conveyor(Callable&& consumer)
+                    : _consumer(std::forward<Callable>(consumer))
                       , _forwarder(*this)
                       , _consumerHandle(std::async(std::launch::async, [this] { run(); }))
             {
@@ -79,14 +79,14 @@ namespace jstd
 
             virtual ~conveyor() = default;
 
-            template<typename T>
-            void push(T&& forwardValue)
+            template<typename ForwardType>
+            void push(ForwardType&& forwardValue)
             {
                 checkForError();
 
                 std::unique_lock<std::mutex> lock(_mutex);
 
-                _queue.push(std::forward<T>(forwardValue));
+                _queue.push(std::forward<ForwardType>(forwardValue));
 
                 lock.unlock();
                 _cv.notify_one();
@@ -161,9 +161,9 @@ namespace jstd
 
         private:
             std::unique_ptr<conveyor_proxy> _proxy;
-            ConsumerT _consumer;
+            Callable _consumer;
 
-            std::queue<ForwardT> _queue;
+            std::queue<T> _queue;
             std::mutex _mutex;
             std::condition_variable _cv;
 
@@ -176,29 +176,29 @@ namespace jstd
             std::atomic_bool _hasError { false };
         };
 
-        template <typename ConsumerT,
-                  typename SourceT = typename callable_type<ConsumerT>::source_type,
-                  typename ConveyorT = conveyor<SourceT, ConsumerT> >
-        std::unique_ptr<ConveyorT> make_conveyor(ConsumerT&& consumer)
+        template <typename T,
+                  typename SourceType = typename callable_type<T>::source_type,
+                  typename ConveyorType = conveyor<SourceType, T> >
+        std::unique_ptr<ConveyorType> make_conveyor(T&& consumer)
         {
-            static_assert(callable_type<ConsumerT>::callable == CallableType::consumer,
+            static_assert(callable_type<T>::callable == CallableType::consumer,
                           "The consumer signature is invalid. Expected: 'void(ForwardType&&)'");
-            static_assert(std::is_move_constructible<SourceT>::value,
+            static_assert(std::is_move_constructible<SourceType>::value,
                           "The template parameter is not move constructable. "
                                   "If this type cannot be made move constructable use std::unique_ptr<T>.");
 
-            return std::make_unique<ConveyorT>(std::forward<ConsumerT>(consumer));
+            return std::make_unique<ConveyorType>(std::forward<T>(consumer));
         };
 
-        template <typename ConverterT, typename... Args,
-                  typename SourceT = typename callable_type<ConverterT>::source_type,
-                typename std::enable_if<callable_type<ConverterT>::callable == CallableType::converter, int>::type = 0>
-        auto make_conveyor(ConverterT&& converter, Args&&... args)
+        template <typename T, typename... Args,
+                  typename SourceType = typename callable_type<T>::source_type,
+                typename std::enable_if<callable_type<T>::callable == CallableType::converter, int>::type = 0>
+        auto make_conveyor(T&& converter, Args&&... args)
         {
             auto&& conveyor = make_conveyor(std::forward<Args>(args)...);
             auto& forwarder = conveyor->getForwarder();
 
-            auto&& consumer = [&forwarder, cv = std::forward<ConverterT>(converter)](SourceT&& value)
+            auto&& consumer = [&forwarder, cv = std::forward<T>(converter)](SourceType&& value)
             {
                 cv(std::move(value), forwarder);
             };
@@ -211,12 +211,14 @@ namespace jstd
     }
 
 
-    template <typename ProducerT, typename ConverterOrConsumerT, typename... Args>
-    void conveyor_function(ProducerT&& producer, ConverterOrConsumerT&& converterOrConsumer, Args&&... args)
+    template <typename FirstCallable, typename SecondCallable, typename... CallableRest>
+    void conveyor_function(FirstCallable&& producer, SecondCallable&& converterOrConsumer, CallableRest&&... args)
     {
+        conveyor_internal::assert_signature<FirstCallable, SecondCallable, CallableRest...>();
+
         auto&& conveyor =
-                conveyor_internal::make_conveyor(std::forward<ConverterOrConsumerT>(converterOrConsumer),
-                                                 std::forward<Args>(args)...);
+                conveyor_internal::make_conveyor(std::forward<SecondCallable>(converterOrConsumer),
+                                                 std::forward<CallableRest>(args)...);
         try
         {
             producer(conveyor->getForwarder());
