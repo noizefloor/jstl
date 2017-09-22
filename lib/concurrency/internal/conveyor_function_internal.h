@@ -217,8 +217,16 @@ namespace jstd
             static_assert(std::is_same<typename callable_type<First>::target_type,
                                        typename callable_type<Second>::source_type>::value,
                           "Types of two successive callable parameters do not match.\n"
-                                  "Expected: void(conveyor_forwarder<'type'>&), "
-                                  "void('type'&&)");
+                          "Expected: void(conveyor_forwarder<'type'>&), "
+                          "void('type'&&)");
+        };
+
+        template <typename T>
+        struct assert_move_constructible
+        {
+            static_assert(std::is_move_constructible<typename callable_type<T>::target_type>::value,
+                          "The template parameter is not move constructable. "
+                          "If this type cannot be made move constructable use std::unique_ptr<T>.");
         };
 
         template <typename ProducerT, typename... Args>
@@ -227,12 +235,14 @@ namespace jstd
         template <typename First, typename Second>
         struct assert_signature_args<First, Second> : public assert_converter<First>,
                                                       public assert_consumer<Second>,
-                                                      public assert_type_pairs<First, Second> {};
+                                                      public assert_type_pairs<First, Second>,
+                                                      public assert_move_constructible<First> {};
 
         template <typename First, typename Second, typename... Args>
         struct assert_signature_args<First, Second, Args...> : public assert_converter<First>,
                                                                public assert_converter<Second>,
                                                                public assert_type_pairs<First, Second>,
+                                                               public assert_move_constructible<First>,
                                                                public assert_signature_args<Second, Args...> {};
 
         template <typename ProducerT, typename... Args>
@@ -241,11 +251,13 @@ namespace jstd
         template <typename First, typename Second>
         struct assert_signature<First, Second> : public assert_producer<First>,
                                                  public assert_consumer<Second>,
-                                                 public assert_type_pairs<First, Second> {};
+                                                 public assert_type_pairs<First, Second>,
+                                                 public assert_move_constructible<First> {};
 
         template <typename First, typename Second, typename... Args>
         struct assert_signature<First, Second, Args...> : public assert_producer<First>,
                                                           public assert_type_pairs<First, Second>,
+                                                          public assert_move_constructible<First>,
                                                           public assert_signature_args<Second, Args...>
         {
         };
