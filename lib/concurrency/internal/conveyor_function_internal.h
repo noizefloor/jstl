@@ -146,21 +146,24 @@ namespace jstd
         struct assert_producer
         {
             static_assert(callable_type<T>::callable == CallableType::producer,
-                          "Invalid type of parameter. Expected: void(conveyor_forwarder<'target type'>&)");
+                          "Invalid type of parameter.\n"
+                          "Expected: void(conveyor_forwarder<'target type'>&)");
         };
 
         template <typename T>
         struct assert_converter
         {
             static_assert(callable_type<T>::callable == CallableType::converter,
-                          "Invalid type of parameter. Expected: void('source type'&&, conveyor_forwarder<'target type'>&)");
+                          "Invalid type of parameter.\n"
+                          "Expected: void('source type'&&, conveyor_forwarder<'target type'>&)");
         };
 
         template <typename T>
         struct assert_consumer
         {
             static_assert(callable_type<T>::callable == CallableType::consumer,
-                          "Invalid type of parameter. Expected: void(conveyor_forwarder<'source type'>&)");
+                          "Invalid type of parameter.\n"
+                          "Expected: void(conveyor_forwarder<'source type'>&)");
         };
 
         template <typename First, typename Second, typename = void>
@@ -172,7 +175,8 @@ namespace jstd
                                                          callable_type<Second>::callable == CallableType::converter,
                                                          void>::type>
         {
-            static_assert(std::is_same<typename callable_type<First>::target_type, typename callable_type<Second>::source_type>::value,
+            static_assert(std::is_same<typename callable_type<First>::target_type,
+                                       typename callable_type<Second>::source_type>::value,
                           "Types of two successive callable parameters do not match.\n"
                           "Expected: void(conveyor_forwarder<'type'>&), "
                           "void('type'&&, conveyor_forwarder<'target type'>&) ...");
@@ -184,7 +188,8 @@ namespace jstd
                                                          callable_type<Second>::callable == CallableType::converter,
                                                          void>::type>
         {
-            static_assert(std::is_same<typename callable_type<First>::target_type, typename callable_type<Second>::source_type>::value,
+            static_assert(std::is_same<typename callable_type<First>::target_type,
+                                       typename callable_type<Second>::source_type>::value,
                           "Types of two successive callable parameters do not match.\n"
                           "Expected: ... void('source type'&&, conveyor_forwarder<'type'>&), "
                           "void('type'&&, conveyor_forwarder<'target type'>&) ...");
@@ -196,7 +201,8 @@ namespace jstd
                                                          callable_type<Second>::callable == CallableType::consumer,
                                                          void>::type>
         {
-            static_assert(std::is_same<typename callable_type<First>::target_type, typename callable_type<Second>::source_type>::value,
+            static_assert(std::is_same<typename callable_type<First>::target_type,
+                                       typename callable_type<Second>::source_type>::value,
                           "Types of two successive callable parameters do not match.\n"
                           "Expected: ... void('source type'&&, conveyor_forwarder<'type'>&), "
                           "void('type'&&)");
@@ -208,7 +214,8 @@ namespace jstd
                                                          callable_type<Second>::callable == CallableType::consumer,
                                                          void>::type>
         {
-            static_assert(std::is_same<typename callable_type<First>::target_type, typename callable_type<Second>::source_type>::value,
+            static_assert(std::is_same<typename callable_type<First>::target_type,
+                                       typename callable_type<Second>::source_type>::value,
                           "Types of two successive callable parameters do not match.\n"
                                   "Expected: void(conveyor_forwarder<'type'>&), "
                                   "void('type'&&)");

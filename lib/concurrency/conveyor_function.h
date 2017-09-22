@@ -61,7 +61,8 @@ namespace jstd
                 void push(const T& forwardValue) override
                 {
                     static_assert(std::is_copy_constructible<T>::value,
-                                  "Pushing a non copyable type by reference is not supported. Consider using std::move.");
+                                  "Pushing a non copyable type by reference is not supported. "
+                                  "Consider using std::move.");
                     _forwarder.push(forwardValue);
                 }
 
@@ -181,12 +182,6 @@ namespace jstd
                   typename ConveyorType = conveyor<SourceType, T> >
         std::unique_ptr<ConveyorType> make_conveyor(T&& consumer)
         {
-            static_assert(callable_type<T>::callable == CallableType::consumer,
-                          "The consumer signature is invalid. Expected: 'void(ForwardType&&)'");
-            static_assert(std::is_move_constructible<SourceType>::value,
-                          "The template parameter is not move constructable. "
-                                  "If this type cannot be made move constructable use std::unique_ptr<T>.");
-
             return std::make_unique<ConveyorType>(std::forward<T>(consumer));
         };
 
