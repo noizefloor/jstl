@@ -318,20 +318,20 @@ TEST(UnitTest_conveyor_function, forwarder_type)
 {
     using ForwarderType = jstd::conveyor_forwarder<std::string>;
 
-    const auto isForwarder = jstd::conveyor_internal::forwarder_type<ForwarderType>::is_forwarder;
+    const auto isForwarder = jstd::internal::forwarder_type<ForwarderType>::is_forwarder;
     EXPECT_TRUE(isForwarder);
 
-    using ActualType = jstd::conveyor_internal::forwarder_type<ForwarderType>::type;
+    using ActualType = jstd::internal::forwarder_type<ForwarderType>::type;
     const auto isString = std::is_same<ActualType, std::string>::value;
     EXPECT_TRUE(isString);
 }
 
 TEST(UnitTest_conveyor_function, forwarder_type_wrongType)
 {
-    const auto isForwarder = jstd::conveyor_internal::forwarder_type<std::string>::is_forwarder;
+    const auto isForwarder = jstd::internal::forwarder_type<std::string>::is_forwarder;
     EXPECT_FALSE(isForwarder);
 
-    using ActualType = jstd::conveyor_internal::forwarder_type<std::string>::type;
+    using ActualType = jstd::internal::forwarder_type<std::string>::type;
     const auto isString = std::is_same<ActualType, std::string>::value;
     EXPECT_FALSE(isString);
 }
@@ -340,40 +340,40 @@ TEST(UnitTest_conveyor_function, callable_type_unknown_lambda)
 {
     auto input = [](std::string&) {};
 
-    using CallableType = jstd::conveyor_internal::callable_type<decltype(input)>;
+    using CallableType = jstd::internal::callable_type<decltype(input)>;
 
     const auto callableType = CallableType::callable;
-    EXPECT_EQ(jstd::conveyor_internal::CallableType::unknown, callableType);
+    EXPECT_EQ(jstd::internal::Callable::unknown, callableType);
 }
 
 TEST(UnitTest_conveyor_function, callable_type_unknown_variable)
 {
     auto input = std::string();
 
-    using CallableType = jstd::conveyor_internal::callable_type<decltype(input)>;
+    using CallableType = jstd::internal::callable_type<decltype(input)>;
 
     const auto callableType = CallableType::callable;
-    EXPECT_EQ(jstd::conveyor_internal::CallableType::unknown, callableType);
+    EXPECT_EQ(jstd::internal::Callable::unknown, callableType);
 }
 
 TEST(UnitTest_conveyor_function, callable_type_unknown_return_type)
 {
     auto input = [](jstd::conveyor_forwarder<std::string>&) { return 0; };
 
-    using CallableType = jstd::conveyor_internal::callable_type<decltype(input)>;
+    using CallableType = jstd::internal::callable_type<decltype(input)>;
 
     const auto callableType = CallableType::callable;
-    EXPECT_EQ(jstd::conveyor_internal::CallableType::unknown, callableType);
+    EXPECT_EQ(jstd::internal::Callable::unknown, callableType);
 }
 
 TEST(UnitTest_conveyor_function, callable_type_producer)
 {
     auto input = [](jstd::conveyor_forwarder<std::string>&) {};
 
-    using CallableType = jstd::conveyor_internal::callable_type<decltype(input)>;
+    using CallableType = jstd::internal::callable_type<decltype(input)>;
 
     const auto callableType = CallableType::callable;
-    EXPECT_EQ(jstd::conveyor_internal::CallableType::producer, callableType);
+    EXPECT_EQ(jstd::internal::Callable::producer, callableType);
 
     const auto isTargetValid = std::is_same<CallableType::target_type, std::string >::value;
     EXPECT_TRUE(isTargetValid) << "converter_type::source is not std::string";
@@ -383,10 +383,10 @@ TEST(UnitTest_conveyor_function, callable_type_converter)
 {
     auto input = [](std::vector<std::string>&&, jstd::conveyor_forwarder<std::string>&) {};
 
-    using CallableType = jstd::conveyor_internal::callable_type<decltype(input)>;
+    using CallableType = jstd::internal::callable_type<decltype(input)>;
 
     const auto callableType = CallableType::callable;
-    EXPECT_EQ(jstd::conveyor_internal::CallableType::converter, callableType);
+    EXPECT_EQ(jstd::internal::Callable::converter, callableType);
 
     const auto isSourceValid = std::is_same<CallableType::source_type, std::vector<std::string> >::value;
     EXPECT_TRUE(isSourceValid) << "converter_type::source is not std::vector<std::string>";
@@ -399,10 +399,10 @@ TEST(UnitTest_conveyor_function, callable_type_consumer)
 {
     auto input = [](std::vector<std::string>&&) {};
 
-    using CallableType = jstd::conveyor_internal::callable_type<decltype(input)>;
+    using CallableType = jstd::internal::callable_type<decltype(input)>;
 
     const auto callableType = CallableType::callable;
-    EXPECT_EQ(jstd::conveyor_internal::CallableType::consumer, callableType);
+    EXPECT_EQ(jstd::internal::Callable::consumer, callableType);
 
     const auto isSourceValid = std::is_same<CallableType::source_type, std::vector<std::string> >::value;
     EXPECT_TRUE(isSourceValid) << "converter_type::source is not std::vector<std::string>";
