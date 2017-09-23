@@ -83,7 +83,7 @@ namespace jstd
             template<typename ForwardType>
             void push(ForwardType&& forwardValue)
             {
-                checkForError();
+                checkForErrorInternal();
 
                 std::unique_lock<std::mutex> lock(_mutex);
 
@@ -110,8 +110,7 @@ namespace jstd
                 if (_proxy)
                     _proxy->checkForError();
 
-                if (_hasError)
-                    std::rethrow_exception(_error);
+                checkForErrorInternal();
             }
 
             void setConveyorProxy(std::unique_ptr<conveyor_proxy>&& proxy)
@@ -125,6 +124,12 @@ namespace jstd
             }
 
         private:
+
+            void checkForErrorInternal() const
+            {
+                if (_hasError)
+                    rethrow_exception(_error);
+            }
 
             void run()
             {

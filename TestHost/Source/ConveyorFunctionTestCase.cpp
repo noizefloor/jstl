@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "PerformanceCounter.h"
 
 #include <concurrency/conveyor_function.h>
 
@@ -405,5 +406,25 @@ TEST(UnitTest_conveyor_function, callable_type_consumer)
 
     const auto isSourceValid = std::is_same<CallableType::source_type, std::vector<std::string> >::value;
     EXPECT_TRUE(isSourceValid) << "converter_type::source is not std::vector<std::string>";
+}
+
+
+TEST(PerformanceTest_conveyor_function, move)
+{
+    auto&& pc = PerformanceCounter(*testing::UnitTest::GetInstance());
+    auto&& results = std::vector<std::string>();
+
+    auto&& stringValue = std::string(100, 'a');
+
+    for (auto i = 0; i < 10; ++i)
+    {
+        pc.start();
+        jstd::conveyor_function([&](jstd::conveyor_forwarder<std::string>& f)
+        {
+            for (auto j = 0; j < 100000; ++j)
+                f.push(stringValue + std::to_string(j));
+        }, [&](std::string&& value) { results.push_back(std::move(value)); });
+        pc.stop();
+    }
 }
 
