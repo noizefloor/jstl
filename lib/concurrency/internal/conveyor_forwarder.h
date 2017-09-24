@@ -25,15 +25,45 @@
 
 namespace jstd
 {
-    template<typename ForwardT>
+    /**
+     * @addtogroup concurrency
+     * @{
+     */
+
+    /**
+     * @brief Virtual class that gets passed to a producer or consumer callable as a parameter.
+     *
+     * This classed can be used to push data to the following callable that is running on a separated thread.
+     * test
+     * @tparam Target_type The Type of the data that should be forwarded to the next callable.
+     */
+    template<typename Target_type>
     class conveyor_forwarder
     {
     public:
         virtual ~conveyor_forwarder() = default;
 
-        virtual void push(ForwardT&& forwardValue) = 0;
+        /**@{*/
 
-        virtual void push(const ForwardT& forwardValue) = 0;
+        /**
+         * @brief Pushes a value to the following forwarder.
+         * @param forwardValue Rvalue reference to a value that should be forwarded to the next callable that is
+         * running on a separated thread.
+         */
+        virtual void push(Target_type&& forwardValue) = 0;
+
+        /**
+         * @brief Pushes a value to the following forwarder.
+         * @param forwardValue Lvalue reference to a value that should be forwarded to the next callable that is
+         * running on a separated thread.
+         * @warning As this method takes a constant lvalue reference a copy of the value needs to be made.
+         * Whenever possible the value should be forwarded as rvalue reference to get better performance.
+         */
+        virtual void push(const Target_type& forwardValue) = 0;
+
+        /**@}*/
     };
+
+    /**@}*/
 
 } // jstd

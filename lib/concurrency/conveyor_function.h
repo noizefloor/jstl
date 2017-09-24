@@ -26,55 +26,80 @@
 
 #include "internal/conveyor_forwarder.h"
 #include "internal/conveyor.h"
-#include "internal/conveyor_traits.h"
 #include "internal/conveyor_assertions.h"
 
-
+/**
+ * jstd
+ * @brief Jan Schwers Template Library namespace
+ */
 namespace jstd
 {
-    namespace internal
+    /**
+     * @addtogroup concurrency
+     * @{
+     */
+
+    /**
+     * @brief Runs multiple callables on separated threads, while managing the synchronization of forwarded data
+     * between the threads.
+     *
+     * The function takes a variadic number of callables (at least two). Every callable can forward data
+     * (variables, objects...) to the following callable, by pushing it to the conveyor_forwarder.
+     * The following callable will be called on a different thread and will receive the data as a rvalue reference.
+     * The synchronization of the forwarded data between the
+     * threads is handled by conveyor_function.
+     *
+     *
+     * @tparam Callable_0 Type of the first callable.
+     * <ul>
+     *     <li>
+     *         This callable is called the producer.<br>
+     *         The signature of a producer callable is expected to look like:
+     *         @code void(conveyor_forwarder<Target_type>&) @endcode
+     *     </li>
+     * </ul>
+     * @tparam Callable_1 Type of the second callable.
+     * <ul>
+     *     <li>
+     *         If this callable is the last, it is called the consumer.<br>
+     *         The signature of a consumer callable is expected to look like:
+     *         @code void(Source_type&&) @endcode
+     *     </li>
+     *     <li>
+     *         If this callable is not the last, it is called a converter.<br>
+     *         The signature of a converter callable is expected to look like:
+     *         @code void(Source_type&&, conveyor_forwarder<Target_type>&) @endcode
+     *     </li>
+     * </ul>
+     * @tparam Callable_N Parameter pack of more callables.
+     * <ul>
+     *     <li>
+     *         All, but the last callable must meet the requirements of a
+     *         converter.
+     *     </li>
+     *     <li>
+     *         The last callable must meet the requirements of a consumer.
+     *     </li>
+     * </ul>
+     * @param callable_0 The first callable.<ul><li>Must meet all requirements of a producer.</li></ul>
+     * @param callable_1 The second callable.
+     * <ul>
+     *     <li>If this is the last callable, it must meet the requirements of a consumer.</li>
+     *     <li>If this is not the last callable, it must meet the requirements of a converter.</li>
+     * </ul>
+     * @param callable_n Parameter pack of more callables.
+     * <ul><li>If callable_1 meets the requirements of a consumer, the parameter pack needs to be empty.</li></ul>
+     */
+    template <typename Callable_0, typename Callable_1, typename... Callable_N>
+    void conveyor_function(Callable_0&& callable_0, Callable_1&& callable_1, Callable_N&&... callable_n)
     {
+        internal::assert_signature<Callable_0, Callable_1, Callable_N...>();
 
-        template <typename T,
-                  typename SourceType = typename callable_type<T>::source_type,
-                  typename ConveyorType = conveyor<SourceType, T> >
-        std::unique_ptr<ConveyorType> make_conveyor(T&& consumer)
-        {
-            return std::make_unique<ConveyorType>(std::forward<T>(consumer));
-        };
-
-        template <typename T, typename... Args,
-                  typename SourceType = typename callable_type<T>::source_type,
-                typename std::enable_if<callable_type<T>::callable == Callable::converter, int>::type = 0>
-        auto make_conveyor(T&& converter, Args&&... args)
-        {
-            auto&& conveyor = make_conveyor(std::forward<Args>(args)...);
-            auto& forwarder = conveyor->getForwarder();
-
-            auto&& consumer = [&forwarder, cv = std::forward<T>(converter)](SourceType&& value)
-            {
-                cv(std::move(value), forwarder);
-            };
-
-            auto&& resultConveyor = make_conveyor(std::move(consumer));
-            resultConveyor->setConveyorProxy(std::move(conveyor));
-
-            return std::move(resultConveyor);
-        };
-    }
-
-
-    template <typename FirstCallable, typename SecondCallable, typename... CallableRest>
-    void conveyor_function(FirstCallable&& producer, SecondCallable&& converterOrConsumer, CallableRest&&... args)
-    {
-        internal::assert_signature<FirstCallable, SecondCallable, CallableRest...>();
-
-        auto&& conveyor =
-                internal::make_conveyor(std::forward<SecondCallable>(converterOrConsumer),
-                                                 std::forward<CallableRest>(args)...);
+        auto&& conveyor = internal::make_conveyor(std::forward<Callable_1>(callable_1),
+                                                  std::forward<Callable_N>(callable_n)...);
         try
         {
-            producer(conveyor->getForwarder());
+            callable_0(conveyor->getForwarder());
         }
         catch (...)
         {
@@ -86,6 +111,8 @@ namespace jstd
         conveyor->checkForError();
     };
 
+    /**@}*/
 
 } // jstd
+
 

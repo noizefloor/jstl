@@ -28,6 +28,7 @@
 #include <future>
 
 #include "conveyor_forwarder.h"
+#include "conveyor_traits.h"
 
 namespace jstd
 {
@@ -184,6 +185,33 @@ namespace jstd
             std::exception_ptr _error;
             std::atomic<bool> _hasError { false };
         };
+
+        template <typename T,
+                  typename SourceType = typename callable_type<T>::source_type,
+                  typename ConveyorType = conveyor<SourceType, T> >
+        std::unique_ptr<ConveyorType> make_conveyor(T&& consumer)
+        {
+            return std::make_unique<ConveyorType>(std::forward<T>(consumer));
+        };
+
+        template <typename T, typename... Args,
+                  typename SourceType = typename callable_type<T>::source_type,
+                typename std::enable_if<callable_type<T>::callable == Callable::converter, int>::type = 0>
+        auto make_conveyor(T&& converter, Args&&... args)
+        {
+            auto&& conveyor = make_conveyor(std::forward<Args>(args)...);
+            auto& forwarder = conveyor->getForwarder();
+
+            auto&& consumer = [&forwarder, cv = std::forward<T>(converter)](SourceType&& value)
+            {
+                cv(std::move(value), forwarder);
+            };
+
+            auto&& resultConveyor = make_conveyor(std::move(consumer));
+            resultConveyor->setConveyorProxy(std::move(conveyor));
+
+            return std::move(resultConveyor);
+        }
 
     } // internal
 

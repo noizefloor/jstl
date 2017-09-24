@@ -42,3 +42,4 @@ TestHost/\.idea/
 TestHost/cmake-build-debug/
 
 TestHost/cmake-build-release/
+doc
