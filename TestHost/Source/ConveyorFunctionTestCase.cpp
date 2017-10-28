@@ -28,6 +28,29 @@ TEST(UnitTest_conveyor_function, pushByMove)
     EXPECT_THAT(results, ElementsAre("value1"s, "value2"s, "value3"s, "value4"s, "value5"s));
 }
 
+TEST(UnitTest_conveyor_function, pushByMove_notCopyable)
+{
+    using TestType = std::unique_ptr<std::string>;
+    auto&& results = std::vector<TestType>();
+
+    jstd::conveyor_function([](jstd::conveyor_forwarder<TestType>& forwarder)
+                            {
+                                forwarder.push(std::make_unique<std::string>("value1"));
+                                forwarder.push(std::make_unique<std::string>("value2"));
+                                forwarder.push(std::make_unique<std::string>("value3"));
+                                forwarder.push(std::make_unique<std::string>("value4"));
+                                forwarder.push(std::make_unique<std::string>("value5"));
+                            },
+                            [&](TestType&& value)
+                            {
+                                results.push_back(std::move(value));
+                            });
+
+
+
+    EXPECT_THAT(results, testing::SizeIs(5));
+}
+
 TEST(UnitTest_conveyor_function, pushByCopy)
 {
     auto&& results = std::vector<std::string>();

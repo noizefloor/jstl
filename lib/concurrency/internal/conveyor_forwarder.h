@@ -25,6 +25,15 @@
 
 namespace jstd
 {
+    template <typename T>
+    struct is_copy_move_constructible
+    {
+        static const bool value = std::is_copy_constructible<T>::value && std::is_move_constructible<T>::value;
+    };
+
+    template<typename Target_type, typename Enable = void>
+    class conveyor_forwarder;
+
     /**
      * @addtogroup concurrency
      * @{
@@ -38,7 +47,7 @@ namespace jstd
      * @tparam Target_type The Type of the data that should be forwarded to the next callable.
      */
     template<typename Target_type>
-    class conveyor_forwarder
+    class conveyor_forwarder<Target_type, typename std::enable_if<is_copy_move_constructible<Target_type>::value>::type>
     {
     public:
         virtual ~conveyor_forwarder() = default;
@@ -59,11 +68,23 @@ namespace jstd
          * @warning As this method takes a constant lvalue reference a copy of the value needs to be made.
          * Whenever possible the value should be forwarded as rvalue reference to get better performance.
          */
-        virtual void push(const Target_type& forwardValue) = 0;
+        void push(const Target_type& forwardValue)
+        {
+            push(Target_type(forwardValue));
+        }
 
         /**@}*/
     };
 
     /**@}*/
+
+    template<typename T>
+    class conveyor_forwarder<T, typename std::enable_if<!std::is_copy_constructible<T>::value >::type>
+    {
+    public:
+        virtual ~conveyor_forwarder() = default;
+
+        virtual void push(T&& forwardValue) = 0;
+    };
 
 } // jstd

@@ -62,14 +62,6 @@ namespace jstd
                     _forwarder.push(std::move(forwardValue));
                 }
 
-                void push(const T& forwardValue) override
-                {
-                    static_assert(std::is_copy_constructible<T>::value,
-                                  "Pushing a non copyable type by reference is not supported. "
-                                  "Consider using std::move.");
-                    _forwarder.push(forwardValue);
-                }
-
             private:
                 conveyor<T, Callable>& _forwarder;
             };
