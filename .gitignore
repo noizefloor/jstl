@@ -33,11 +33,11 @@ _ReSharper*/
 .DS_Store
 project.xcworkspace/
 xcuserdata/
-xcode/.idea/*
-!xcode/.idea/runConfigurations
 
-
-TestHost/\.idea/
+#Jetbrains
+**/.idea/**/workspace.xml
+**/.idea/**/tasks.xml
+**/.idea/dictionaries
 
 TestHost/cmake-build-debug/
 
