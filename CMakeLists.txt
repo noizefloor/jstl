@@ -4,6 +4,8 @@ cmake_minimum_required(VERSION 3.5)
 
 project(jstl)
 
+# Jan Schwers Template Library
+
 add_library(jstl INTERFACE)
 
 target_compile_features(jstl INTERFACE cxx_std_14)
@@ -13,10 +15,36 @@ target_include_directories(jstl
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:jstl/include>)
 
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
 install(TARGETS jstl EXPORT jstl-config DESTINATION jstl/include)
 
 install(EXPORT jstl-config DESTINATION share/jstl/cmake)
 
+# Documentation
+
+option(BUILD_DOC "Build documentation" ON)
+find_package(Doxygen
+        REQUIRED dot
+        OPTIONAL_COMPONENTS mscgen dia)
+
+if (DOXYGEN_FOUND)
+
+    set(DOXYGEN_GENERATE_HTML YES)
+    set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc)
+    set(HTML_EXTRA_STYLESHEET ${CMAKE_CURRENT_SOURCE_DIR}/doxygen/doxygen_extra.css)
+
+    doxygen_add_docs(doxygen
+            ${CMAKE_CURRENT_SOURCE_DIR}/include
+            COMMENT "Jan Schwers Template Library API documentation")
+
+    install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION share/doc)
+else (DOXYGEN_FOUND)
+    message("Doxygen need to be installed to generate the doxygen documentation")
+endif()
+
+
+# Unit Tests
 
 add_subdirectory(googletest)
 
