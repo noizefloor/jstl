@@ -29,17 +29,8 @@ _ReSharper*/
 *.sdf
 *.VC.db
 
-#XCode
-.DS_Store
-project.xcworkspace/
-xcuserdata/
 
-#Jetbrains
-**/.idea/**/workspace.xml
-**/.idea/**/tasks.xml
-**/.idea/dictionaries
 
 TestHost/cmake-build-debug/
-
 TestHost/cmake-build-release/
 doc
