@@ -1,0 +1,6 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Benchmark flat_set" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="--benchmark_filter=flat_set* --benchmark_repetitions=5 --benchmark_report_aggregates_only=true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="jstl" TARGET_NAME="jstlBenchmark" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="jstl" RUN_TARGET_NAME="jstlBenchmark">
+    <envs />
+    <method />
+  </configuration>
+</component>

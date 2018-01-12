@@ -17,11 +17,11 @@ target_compile_features(jstl INTERFACE cxx_std_14)
 target_include_directories(jstl
     INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:jstl/include>)
+        $<INSTALL_INTERFACE:include/jstl>)
 
 target_link_libraries(jstl INTERFACE ${Boost_LIBRARIES})
 
-install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(DIRECTORY include/ DESTINATION include/jstl)
 
 install(TARGETS jstl EXPORT jstl-config DESTINATION jstl/include)
 
