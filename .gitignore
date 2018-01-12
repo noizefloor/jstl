@@ -29,8 +29,11 @@ _ReSharper*/
 *.sdf
 *.VC.db
 
+# CMake
+cmake-build-debug/
+cmake-build-release/
 
-
-TestHost/cmake-build-debug/
-TestHost/cmake-build-release/
-doc
+# Clion
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/dictionaries
