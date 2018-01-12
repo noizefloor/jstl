@@ -1,12 +1,13 @@
-#include "stdafx.h"
-#include "PerformanceCounter.h"
-
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 #include <concurrency/conveyor_function.h>
+
+#include "PerformanceCounter.h"
 
 using namespace std::literals::string_literals;
 using testing::ElementsAre;
 
-TEST(UnitTest_conveyor_function, pushByMove)
+TEST(conveyor_function, pushByMove)
 {
     auto&& results = std::vector<std::string>();
 
@@ -28,7 +29,7 @@ TEST(UnitTest_conveyor_function, pushByMove)
     EXPECT_THAT(results, ElementsAre("value1"s, "value2"s, "value3"s, "value4"s, "value5"s));
 }
 
-TEST(UnitTest_conveyor_function, pushByMove_notCopyable)
+TEST(conveyor_function, pushByMove_notCopyable)
 {
     using TestType = std::unique_ptr<std::string>;
     auto&& results = std::vector<TestType>();
@@ -51,7 +52,7 @@ TEST(UnitTest_conveyor_function, pushByMove_notCopyable)
     EXPECT_THAT(results, testing::SizeIs(5));
 }
 
-TEST(UnitTest_conveyor_function, pushByCopy)
+TEST(conveyor_function, pushByCopy)
 {
     auto&& results = std::vector<std::string>();
 
@@ -70,7 +71,7 @@ TEST(UnitTest_conveyor_function, pushByCopy)
     EXPECT_THAT(results, ElementsAre("value1"s, "value2"s, "value3"s, "value4"s, "value5"s));
 }
 
-TEST(UnitTest_conveyor_function, copyFirstFunctions)
+TEST(conveyor_function, copyFirstFunctions)
 {
     auto&& results = std::vector<std::string>();
 
@@ -90,7 +91,7 @@ TEST(UnitTest_conveyor_function, copyFirstFunctions)
     EXPECT_THAT(results, ElementsAre("value1"s, "value2"s, "value3"s));
 }
 
-TEST(UnitTest_conveyor_function, copySecondFunctions)
+TEST(conveyor_function, copySecondFunctions)
 {
     auto&& results = std::vector<std::string>();
 
@@ -107,7 +108,7 @@ TEST(UnitTest_conveyor_function, copySecondFunctions)
     EXPECT_THAT(results, ElementsAre("value1"s, "value2"s, "value3"s));
 }
 
-TEST(UnitTest_conveyor_function, copyBothFunctions)
+TEST(conveyor_function, copyBothFunctions)
 {
     auto&& results = std::vector<std::string>();
 
@@ -133,7 +134,7 @@ public:
     }
 };
 
-TEST(UnitTest_conveyor_function, producerThrows)
+TEST(conveyor_function, producerThrows)
 {
     auto&& results = std::vector<std::string>();
 
@@ -149,7 +150,7 @@ TEST(UnitTest_conveyor_function, producerThrows)
     EXPECT_THROW(jstd::conveyor_function(std::move(producer), std::move(consumer)), TestException);
 }
 
-TEST(UnitTest_conveyor_function, consumerThrowsWhileProducing)
+TEST(conveyor_function, consumerThrowsWhileProducing)
 {
     std::atomic_int processed(0);
 
@@ -168,7 +169,7 @@ TEST(UnitTest_conveyor_function, consumerThrowsWhileProducing)
     EXPECT_THROW(jstd::conveyor_function(std::move(producer), std::move(consumer)), TestException);
 }
 
-TEST(UnitTest_conveyor_function, consumerThrowsWhileWaiting)
+TEST(conveyor_function, consumerThrowsWhileWaiting)
 {
     std::atomic_int processed(0);
 
@@ -190,7 +191,7 @@ TEST(UnitTest_conveyor_function, consumerThrowsWhileWaiting)
     EXPECT_THROW(jstd::conveyor_function(std::move(producer), std::move(consumer)), TestException);
 }
 
-TEST(UnitTest_conveyor_function, pipeline_simple)
+TEST(conveyor_function, pipeline_simple)
 {
     auto results = std::vector<std::string>();
 
@@ -242,7 +243,7 @@ private:
     std::string _text;
 };
 
-TEST(UnitTest_conveyor_function, pipeline)
+TEST(conveyor_function, pipeline)
 {
     auto results = std::vector<std::string>();
 
@@ -271,7 +272,7 @@ TEST(UnitTest_conveyor_function, pipeline)
     EXPECT_THAT(results, ElementsAre("A"s, "AA"s, "AAA"s, "AAAA"s, "AAAAA"s));
 }
 
-TEST(UnitTest_conveyor_function, pipeline_consumer_throws)
+TEST(conveyor_function, pipeline_consumer_throws)
 {
     auto results = std::vector<std::string>();
 
@@ -303,7 +304,7 @@ TEST(UnitTest_conveyor_function, pipeline_consumer_throws)
     EXPECT_THROW(jstd::conveyor_function(producer, converter, consumer), TestException);
 }
 
-TEST(UnitTest_conveyor_function, pipeline_converter_throws)
+TEST(conveyor_function, pipeline_converter_throws)
 {
     auto results = std::vector<std::string>();
 
@@ -337,7 +338,7 @@ TEST(UnitTest_conveyor_function, pipeline_converter_throws)
     EXPECT_THROW(jstd::conveyor_function(producer, converter, consumer), TestException);
 }
 
-TEST(UnitTest_conveyor_function, forwarder_type)
+TEST(conveyor_function, forwarder_type)
 {
     using ForwarderType = jstd::conveyor_forwarder<std::string>;
 
@@ -349,7 +350,7 @@ TEST(UnitTest_conveyor_function, forwarder_type)
     EXPECT_TRUE(isString);
 }
 
-TEST(UnitTest_conveyor_function, forwarder_type_wrongType)
+TEST(conveyor_function, forwarder_type_wrongType)
 {
     const auto isForwarder = jstd::internal::forwarder_type<std::string>::is_forwarder;
     EXPECT_FALSE(isForwarder);
@@ -359,7 +360,7 @@ TEST(UnitTest_conveyor_function, forwarder_type_wrongType)
     EXPECT_FALSE(isString);
 }
 
-TEST(UnitTest_conveyor_function, callable_type_unknown_lambda)
+TEST(conveyor_function, callable_type_unknown_lambda)
 {
     auto input = [](std::string&) {};
 
@@ -369,7 +370,7 @@ TEST(UnitTest_conveyor_function, callable_type_unknown_lambda)
     EXPECT_EQ(jstd::internal::Callable::unknown, callableType);
 }
 
-TEST(UnitTest_conveyor_function, callable_type_unknown_variable)
+TEST(conveyor_function, callable_type_unknown_variable)
 {
     auto input = std::string();
 
@@ -379,7 +380,7 @@ TEST(UnitTest_conveyor_function, callable_type_unknown_variable)
     EXPECT_EQ(jstd::internal::Callable::unknown, callableType);
 }
 
-TEST(UnitTest_conveyor_function, callable_type_unknown_return_type)
+TEST(conveyor_function, callable_type_unknown_return_type)
 {
     auto input = [](jstd::conveyor_forwarder<std::string>&) { return 0; };
 
@@ -389,7 +390,7 @@ TEST(UnitTest_conveyor_function, callable_type_unknown_return_type)
     EXPECT_EQ(jstd::internal::Callable::unknown, callableType);
 }
 
-TEST(UnitTest_conveyor_function, callable_type_producer)
+TEST(conveyor_function, callable_type_producer)
 {
     auto input = [](jstd::conveyor_forwarder<std::string>&) {};
 
@@ -402,7 +403,7 @@ TEST(UnitTest_conveyor_function, callable_type_producer)
     EXPECT_TRUE(isTargetValid) << "converter_type::source is not std::string";
 }
 
-TEST(UnitTest_conveyor_function, callable_type_converter)
+TEST(conveyor_function, callable_type_converter)
 {
     auto input = [](std::vector<std::string>&&, jstd::conveyor_forwarder<std::string>&) {};
 
@@ -418,7 +419,7 @@ TEST(UnitTest_conveyor_function, callable_type_converter)
     EXPECT_TRUE(isTargetValid) << "converter_type::source is not std::string";
 }
 
-TEST(UnitTest_conveyor_function, callable_type_consumer)
+TEST(conveyor_function, callable_type_consumer)
 {
     auto input = [](std::vector<std::string>&&) {};
 
@@ -431,23 +432,4 @@ TEST(UnitTest_conveyor_function, callable_type_consumer)
     EXPECT_TRUE(isSourceValid) << "converter_type::source is not std::vector<std::string>";
 }
 
-
-TEST(PerformanceTest_conveyor_function, move)
-{
-    auto&& pc = PerformanceCounter(*testing::UnitTest::GetInstance());
-    auto&& results = std::vector<std::string>();
-
-    auto&& stringValue = std::string(100, 'a');
-
-    for (auto i = 0; i < 10; ++i)
-    {
-        pc.start();
-        jstd::conveyor_function([&](jstd::conveyor_forwarder<std::string>& f)
-        {
-            for (auto j = 0; j < 100000; ++j)
-                f.push(stringValue + std::to_string(j));
-        }, [&](std::string&& value) { results.push_back(std::move(value)); });
-        pc.stop();
-    }
-}
 

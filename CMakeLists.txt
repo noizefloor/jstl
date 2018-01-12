@@ -6,6 +6,10 @@ project(jstl)
 
 # Jan Schwers Template Library
 
+find_package(boost 1.5.6.0
+        REQUIRED
+        COMPONENTS container)
+
 add_library(jstl INTERFACE)
 
 target_compile_features(jstl INTERFACE cxx_std_14)
@@ -14,6 +18,8 @@ target_include_directories(jstl
     INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:jstl/include>)
+
+target_link_libraries(jstl INTERFACE ${Boost_LIBRARIES})
 
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
@@ -57,13 +63,16 @@ add_executable(jstlTestHost
         TestHost/ConveyorFunctionTestCase.cpp
         TestHost/FunctionTraitsTestCase.cpp
         TestHost/PerformanceCounter.cpp
-        TestHost/main.cpp)
+        TestHost/main.cpp TestHost/FlatSetTestCase.cpp)
 
 target_compile_features(jstlTestHost PRIVATE cxx_std_14)
 
-add_precompiled_header(jstlTestHost stdafx.h)
+add_precompiled_header(jstlTestHost
+        stdafx.h
+        SOURCE_CXX stdafx.cpp
+        FORCEINCLUDE)
 
-target_include_directories(jstlTestHost PRIVATE TestHost/inc)
+target_include_directories(jstlTestHost PRIVATE TestHost)
 
 target_link_libraries(jstlTestHost
     PRIVATE
@@ -72,3 +81,29 @@ target_link_libraries(jstlTestHost
         gmock)
 
 add_test(NAME UnitTests COMMAND jstlTestHost --gtest_filter=UnitTest*)
+
+# Benchmarks
+
+find_package(benchmark)
+
+add_executable(jstlBenchmark
+        Benchmark/stdafx.h
+        Benchmark/stdafx.cpp
+        Benchmark/main.cpp
+        Benchmark/ConveyorFunctionBenchmark.cpp
+        Benchmark/ConveyorBenchmark.cpp
+        Benchmark/FlatSetBenchmark.cpp)
+
+target_compile_features(jstlBenchmark PRIVATE cxx_std_14)
+
+add_precompiled_header(jstlBenchmark
+        stdafx.h
+        SOURCE_CXX stdafx.cpp
+        FORCEINCLUDE)
+
+target_include_directories(jstlTestHost PRIVATE Benchmark)
+
+target_link_libraries(jstlBenchmark
+    PRIVATE
+        benchmark
+        jstl)

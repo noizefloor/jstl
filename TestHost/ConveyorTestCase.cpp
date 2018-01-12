@@ -1,4 +1,5 @@
-#include "stdafx.h"
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 #include <concurrency/conveyor.h>
 
@@ -8,7 +9,7 @@ using jstd::conveyor;
 using testing::ElementsAre;
 using namespace std::literals::string_literals;
 
-TEST(UnitTest_conveyor, pushByMoveAndWait)
+TEST(conveyor, pushByMoveAndWait)
 {
     auto&& results = std::vector<std::string>();
 
@@ -26,7 +27,7 @@ TEST(UnitTest_conveyor, pushByMoveAndWait)
     EXPECT_THAT(results, ElementsAre("value1"s, "value2"s, "value3"s, "value4"s, "value5"s));
 }
 
-TEST(UnitTest_conveyor, pushByCopyAndWait)
+TEST(conveyor, pushByCopyAndWait)
 {
     auto&& results = std::vector<std::string>();
 
@@ -71,7 +72,7 @@ private:
     std::string _value;
 };
 
-TEST(UnitTest_conveyor, notMoveAssignable)
+TEST(conveyor, notMoveAssignable)
 {
     auto&& results = std::vector<NotMoveAssignable>();
 
@@ -115,7 +116,7 @@ private:
     std::string _value;
 };
 
-TEST(UnitTest_conveyor, notMoveConstructable)
+TEST(conveyor, notMoveConstructable)
 {
     auto&& results = std::vector<std::string>();
 
@@ -156,7 +157,7 @@ private:
     std::string _value;
 };
 
-TEST(UnitTest_conveyor, notCopyable)
+TEST(conveyor, notCopyable)
 {
     auto&& results = std::vector<std::string>();
 
@@ -176,7 +177,7 @@ TEST(UnitTest_conveyor, notCopyable)
     EXPECT_THAT(results, ElementsAre("value1"s, "value2"s, "value3"s, "value4"s, "value5"s));
 }
 
-TEST(UnitTest_conveyor, conveyorPipe)
+TEST(conveyor, conveyorPipe)
 {
     auto&& results = std::vector<std::string>();
 
@@ -195,53 +196,4 @@ TEST(UnitTest_conveyor, conveyorPipe)
     }
 
     EXPECT_THAT(results, ElementsAre("value1"s, "value2"s, "value3"s, "value4"s, "value5"s));
-}
-
-TEST(PerformanceTest_conveyor, move)
-{
-    auto&& pc = PerformanceCounter(*testing::UnitTest::GetInstance());
-    auto&& results = std::vector<std::string>();
-
-    auto&& stringValue = std::string(100, 'a');
-
-    for (auto i = 0; i < 10; ++i)
-    {
-        {
-            pc.start();
-
-            auto&& testConveyor =
-                    conveyor<std::string>( [&](auto&& value) { results.push_back(std::move(value)); });
-
-            for (auto j = 0; j < 100000; ++j)
-                testConveyor.push(stringValue + std::to_string(j));
-        }
-
-        pc.stop();
-    }
-}
-
-TEST(PerformanceTest_conveyor, copy)
-{
-    auto&& pc = PerformanceCounter(*testing::UnitTest::GetInstance());
-
-    auto&& results = std::vector<std::string>();
-    auto&& stringValue = std::string(100, 'a');
-
-    for (auto i = 0; i < 10; ++i)
-    {
-        {
-            pc.start();
-
-            auto&& testConveyor =
-                    conveyor<std::string>( [&](auto&& value) { results.push_back(std::move(value)); });
-
-            for (auto j = 0; j < 100000; ++j)
-            {
-                const auto value = stringValue + std::to_string(j);
-                testConveyor.push(value);
-            }
-        }
-
-        pc.stop();
-    }
 }

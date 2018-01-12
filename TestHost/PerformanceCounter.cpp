@@ -1,4 +1,8 @@
-#include "stdafx.h"
+#include <numeric>
+#include <fstream>
+
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 #include "PerformanceCounter.h"
 
