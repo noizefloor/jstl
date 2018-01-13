@@ -11,7 +11,7 @@ class TestObject
 public:
     explicit TestObject(int value) : value_(value) {}
 
-    short getId() const { return value_; }
+    int getId() const { return value_; }
 
 private:
     char payload_[100];
@@ -39,7 +39,7 @@ struct TestObjectLess
 };
 
 template <typename Set>
-auto constructRandomSet(int size, const std::function<typename Set::value_type(int)>& creator)
+auto constructSet(int size, const std::function<typename Set::value_type(int)>& creator)
 {
     auto randomSet = Set();
     randomSet.reserve(static_cast<size_t>(size));
@@ -59,7 +59,7 @@ static void flat_set_find_int(benchmark::State& state)
     {
         state.PauseTiming();
         const auto creator = [](int value) { return value; };
-        auto flatSet = constructRandomSet<FlatSet>(size, creator);
+        auto flatSet = constructSet<FlatSet>(size, creator);
 
 
         for (auto i = 0; i < size; ++i)
@@ -89,7 +89,7 @@ static void flat_set_find_ptr(benchmark::State& state)
     {
         state.PauseTiming();
         const auto creator = [](int value) { return new TestObject(value); };
-        auto flatSet = constructRandomSet<FlatSet>(size, creator);
+        auto flatSet = constructSet<FlatSet>(size, creator);
 
 
         for (auto i = 0; i < size; ++i)
@@ -121,7 +121,7 @@ static void flat_set_find_unique_ptr(benchmark::State& state)
         state.PauseTiming();
         const auto creator = [](int value) { return std::make_unique<TestObject>(value); };
         auto flatSet =
-                constructRandomSet<FlatSet>(size, creator);
+                constructSet<FlatSet>(size, creator);
 
 
         for (auto i = 0; i < size; ++i)

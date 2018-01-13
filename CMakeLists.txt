@@ -92,7 +92,8 @@ add_executable(jstlBenchmark
         Benchmark/main.cpp
         Benchmark/ConveyorFunctionBenchmark.cpp
         Benchmark/ConveyorBenchmark.cpp
-        Benchmark/FlatSetBenchmark.cpp)
+        Benchmark/FlatSetBenchmark.cpp
+        Benchmark/FlatMapBenchmark.cpp)
 
 target_compile_features(jstlBenchmark PRIVATE cxx_std_14)
 
