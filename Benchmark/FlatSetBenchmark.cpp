@@ -75,8 +75,9 @@ static void flat_set_find_int(benchmark::State& state)
 
     }
     state.SetItemsProcessed(state.iterations() * size);
+    state.SetComplexityN(size);
 }
-BENCHMARK_TEMPLATE(flat_set_find_int, boost::container::flat_set<int>)->Range(1 << 3, 1 << 12);
+BENCHMARK_TEMPLATE(flat_set_find_int, boost::container::flat_set<int>)->RangeMultiplier(2)->Range(1 << 3, 1 << 12)->Complexity(benchmark::oN);
 
 
 
@@ -106,9 +107,11 @@ static void flat_set_find_ptr(benchmark::State& state)
             delete toDelete;
     }
     state.SetItemsProcessed(state.iterations() * size);
+    state.SetComplexityN(size);
 }
 BENCHMARK_TEMPLATE(flat_set_find_ptr, boost::container::flat_set<TestObject*, TestObjectLess>)
-->Range(1 << 3, 1 << 12);
+->RangeMultiplier(2)->Range(1 << 3, 1 << 12)->Complexity(benchmark::oN);
+
 
 
 template <typename FlatSet>
@@ -135,9 +138,10 @@ static void flat_set_find_unique_ptr(benchmark::State& state)
         }
     }
     state.SetItemsProcessed(state.iterations() * size);
+    state.SetComplexityN(size);
 }
 BENCHMARK_TEMPLATE(flat_set_find_unique_ptr, boost::container::flat_set<TestObjectPtr, TestObjectLess>)
-->Range(1 << 3, 1 << 12);
+->RangeMultiplier(2)->Range(1 << 3, 1 << 12)->Complexity(benchmark::oN);
 
 
 template <typename FlatSet>
@@ -165,8 +169,9 @@ static void flat_set_insert_int(benchmark::State& state)
 
     }
     state.SetItemsProcessed(state.iterations() * size);
+    state.SetComplexityN(size);
 }
-BENCHMARK_TEMPLATE(flat_set_insert_int, boost::container::flat_set<int>)->Range(1 << 3, 1 << 12);
+BENCHMARK_TEMPLATE(flat_set_insert_int, boost::container::flat_set<int>)->RangeMultiplier(2)->Range(1 << 3, 1 << 12)->Complexity(benchmark::oN);
 
 
 template <typename FlatSet>
@@ -197,9 +202,10 @@ static void flat_set_insert_ptr(benchmark::State& state)
 
     }
     state.SetItemsProcessed(state.iterations() * size);
+    state.SetComplexityN(size);
 }
 BENCHMARK_TEMPLATE(flat_set_insert_ptr, boost::container::flat_set<TestObject*, TestObjectLess>)
-->Range(1 << 3, 1 << 12);
+->RangeMultiplier(2)->Range(1 << 3, 1 << 12)->Complexity(benchmark::oN);
 
 
 template <typename FlatSet>
@@ -227,9 +233,10 @@ static void flat_set_insert_unique_ptr(benchmark::State& state)
 
     }
     state.SetItemsProcessed(state.iterations() * size);
+    state.SetComplexityN(size);
 }
 BENCHMARK_TEMPLATE(flat_set_insert_unique_ptr, boost::container::flat_set<TestObjectPtr, TestObjectLess>)
-->Range(1 << 3, 1 << 12);
+->RangeMultiplier(2)->Range(1 << 3, 1 << 12)->Complexity(benchmark::oN);
 
 
 template <typename FlatSet>
@@ -257,6 +264,7 @@ static void flat_set_emplace_unique_ptr(benchmark::State& state)
 
     }
     state.SetItemsProcessed(state.iterations() * size);
+    state.SetComplexityN(size);
 }
 BENCHMARK_TEMPLATE(flat_set_emplace_unique_ptr, boost::container::flat_set<TestObjectPtr, TestObjectLess>)
-->Range(1 << 3, 1 << 12);
+->RangeMultiplier(2)->Range(1 << 3, 1 << 12)->Complexity(benchmark::oN);

@@ -56,9 +56,10 @@ static void flat_map_find_ptr(benchmark::State& state)
             delete toDelete.second;
     }
     state.SetItemsProcessed(state.iterations() * size);
+    state.SetComplexityN(size);
 }
 BENCHMARK_TEMPLATE(flat_map_find_ptr, boost::container::flat_map<int, TestObject*>)
-->Range(1 << 3, 1 << 12);
+->RangeMultiplier(2)->Range(1 << 3, 1 << 12)->Complexity(benchmark::oN);
 
 
 template <typename FlatMap>
@@ -83,9 +84,10 @@ static void flat_map_find_unique_ptr(benchmark::State& state)
         }
     }
     state.SetItemsProcessed(state.iterations() * size);
+    state.SetComplexityN(size);
 }
 BENCHMARK_TEMPLATE(flat_map_find_unique_ptr, boost::container::flat_map<int, std::unique_ptr<TestObject> >)
-->Range(1 << 3, 1 << 12);
+->RangeMultiplier(2)->Range(1 << 3, 1 << 12)->Complexity(benchmark::oN);
 
 
 template <typename FlatMap>
@@ -116,9 +118,10 @@ static void flat_map_insert_ptr(benchmark::State& state)
 
     }
     state.SetItemsProcessed(state.iterations() * size);
+    state.SetComplexityN(size);
 }
 BENCHMARK_TEMPLATE(flat_map_insert_ptr, boost::container::flat_map<int, TestObject*>)
-->Range(1 << 3, 1 << 12);
+->RangeMultiplier(2)->Range(1 << 3, 1 << 12)->Complexity(benchmark::oN);
 
 
 template <typename FlatMap>
@@ -145,9 +148,10 @@ static void flat_map_insert_unique_ptr(benchmark::State& state)
         }
     }
     state.SetItemsProcessed(state.iterations() * size);
+    state.SetComplexityN(size);
 }
 BENCHMARK_TEMPLATE(flat_map_insert_unique_ptr, boost::container::flat_map<int, std::unique_ptr<TestObject> >)
-->Range(1 << 3, 1 << 12);
+->RangeMultiplier(2)->Range(1 << 3, 1 << 12)->Complexity(benchmark::oN);
 
 
 
@@ -179,9 +183,10 @@ static void flat_map_emplace_ptr(benchmark::State& state)
 
     }
     state.SetItemsProcessed(state.iterations() * size);
+    state.SetComplexityN(size);
 }
 BENCHMARK_TEMPLATE(flat_map_emplace_ptr, boost::container::flat_map<int, TestObject*>)
-->Range(1 << 3, 1 << 12);
+->RangeMultiplier(2)->Range(1 << 3, 1 << 12)->Complexity(benchmark::oN);
 
 
 
@@ -209,6 +214,7 @@ static void flat_map_emplace_unique_ptr(benchmark::State& state)
         }
     }
     state.SetItemsProcessed(state.iterations() * size);
+    state.SetComplexityN(size);
 }
 BENCHMARK_TEMPLATE(flat_map_emplace_unique_ptr, boost::container::flat_map<int, std::unique_ptr<TestObject> >)
-->Range(1 << 3, 1 << 12);
+->RangeMultiplier(2)->Range(1 << 3, 1 << 12)->Complexity(benchmark::oN);
