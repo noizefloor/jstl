@@ -6,265 +6,152 @@
 
 #include <container/flat_set.h>
 
-class TestObject
-{
-public:
-    explicit TestObject(int value) : value_(value) {}
-
-    int getId() const { return value_; }
-
-private:
-    char payload_[100];
-    int value_;
-};
-
-using TestObjectPtr = std::unique_ptr<TestObject>;
-
-struct TestObjectLess
-{
-    bool operator()(const TestObject& l, const TestObject& r) const
-    {
-        return l.getId() < r.getId();
-    }
-
-    bool operator()(TestObject* l, TestObject* r) const
-    {
-        return l->getId() < r->getId();
-    }
-
-    bool operator()(const TestObjectPtr& l, const TestObjectPtr& r) const
-    {
-        return l->getId() < r->getId();
-    }
-};
-
-template <typename Set>
-auto constructSet(int size, const std::function<typename Set::value_type(int)>& creator)
-{
-    auto randomSet = Set();
-    randomSet.reserve(static_cast<size_t>(size));
-
-    for (auto i = 0; i < size; ++i)
-        randomSet.insert(creator(i));
-
-    return randomSet;
-}
+#include "TestValue.h"
 
 template <typename FlatSet>
-static void flat_set_find_int(benchmark::State& state)
+static void flat_set_find(benchmark::State& state)
 {
     const auto size = state.range(0);
 
+    const auto valueCreator = ValueCreator<typename FlatSet::value_type>();
+
+    auto flatSet = FlatSet();
+    flatSet.reserve(static_cast<size_t>(size));
+
+    for (auto j = 0; j < size; ++j)
+        flatSet.insert(valueCreator.create(j));
+
+    auto testValueIt = flatSet.cbegin();
+
     for (auto _ : state)
     {
-        state.PauseTiming();
-        const auto creator = [](int value) { return value; };
-        auto flatSet = constructSet<FlatSet>(size, creator);
+        auto&& testItem = *testValueIt++;
+        benchmark::DoNotOptimize(flatSet.find(testItem));
 
-
-        for (auto i = 0; i < size; ++i)
-        {
-            const auto value = rand() % size;
-
-            state.ResumeTiming();
-
-            benchmark::DoNotOptimize(flatSet.find(value));
-
-            state.PauseTiming();
-        }
-
+        if (testValueIt == flatSet.cend())
+            testValueIt = flatSet.cbegin();
     }
-    state.SetItemsProcessed(state.iterations() * size);
+
+    state.SetItemsProcessed(state.iterations());
     state.SetComplexityN(size);
 }
-BENCHMARK_TEMPLATE(flat_set_find_int, boost::container::flat_set<int>)->RangeMultiplier(2)->Range(1 << 3, 1 << 12)->Complexity(benchmark::oN);
+BENCHMARK_TEMPLATE(flat_set_find, boost::container::flat_set<short>)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
+
+BENCHMARK_TEMPLATE(flat_set_find, jstd::flat_set<short>)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
+
+BENCHMARK_TEMPLATE(flat_set_find, boost::container::flat_set<int>)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
+
+BENCHMARK_TEMPLATE(flat_set_find, jstd::flat_set<int>)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
+
+BENCHMARK_TEMPLATE(flat_set_find, boost::container::flat_set<long long>)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
+
+BENCHMARK_TEMPLATE(flat_set_find, jstd::flat_set<long long>)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
+
+BENCHMARK_TEMPLATE(flat_set_find, boost::container::flat_set<TestValue*, TestObjectLess>)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
+
+BENCHMARK_TEMPLATE(flat_set_find, jstd::flat_set<TestValue*, TestObjectLess>)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
+
+BENCHMARK_TEMPLATE(flat_set_find, boost::container::flat_set<std::unique_ptr<TestValue>, TestObjectLess>)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
+
+BENCHMARK_TEMPLATE(flat_set_find, jstd::flat_set<std::unique_ptr<TestValue>, TestObjectLess>)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
 
-
-template <typename FlatSet>
-static void flat_set_find_ptr(benchmark::State& state)
+template <typename FlatSet, bool reserved>
+static void flat_set_insert(benchmark::State& state)
 {
-    const auto size = state.range(0);
+    const auto doubleSize = state.range(0) * 2;
+    const auto size = static_cast<size_t>(state.range(0));
+
+    const auto valueCreator = ValueCreator<typename FlatSet::value_type>();
+
+    auto flatSetCreator = [&]
+    {
+        auto&& flatSet = FlatSet();
+
+        if (reserved)
+            flatSet.reserve(size * 2);
+        else
+            flatSet.reserve(size);
+
+        for (auto j = 0; j < doubleSize; j += 2)
+            flatSet.insert(valueCreator.create(j));
+
+        return std::move(flatSet);
+    };
+
+    auto testValuesCreator = [&]
+    {
+        auto values = std::vector<typename FlatSet::value_type>();
+
+        for (auto j = 1; j < doubleSize; j += 2)
+            values.push_back(valueCreator.create(j));
+
+        return std::move(values);
+    };
+
+    auto&& flatSet = flatSetCreator();
+    auto&& values = testValuesCreator();
+
+    auto value = values.begin();
 
     for (auto _ : state)
     {
-        state.PauseTiming();
-        const auto creator = [](int value) { return new TestObject(value); };
-        auto flatSet = constructSet<FlatSet>(size, creator);
+        flatSet.insert(std::move(*value++));
 
-
-        for (auto i = 0; i < size; ++i)
+        if (value == values.end())
         {
-            const auto value = new TestObject(rand() % size);
-            state.ResumeTiming();
-
-            benchmark::DoNotOptimize(flatSet.find(value));
-
             state.PauseTiming();
-        }
+            valueCreator.destroy();
+            flatSet = flatSetCreator();
+            values = testValuesCreator();
 
-        for (auto toDelete : flatSet)
-            delete toDelete;
-    }
-    state.SetItemsProcessed(state.iterations() * size);
-    state.SetComplexityN(size);
-}
-BENCHMARK_TEMPLATE(flat_set_find_ptr, boost::container::flat_set<TestObject*, TestObjectLess>)
-->RangeMultiplier(2)->Range(1 << 3, 1 << 12)->Complexity(benchmark::oN);
-
-
-
-template <typename FlatSet>
-static void flat_set_find_unique_ptr(benchmark::State& state)
-{
-    const auto size = state.range(0);
-
-    for (auto _ : state)
-    {
-        state.PauseTiming();
-        const auto creator = [](int value) { return std::make_unique<TestObject>(value); };
-        auto flatSet =
-                constructSet<FlatSet>(size, creator);
-
-
-        for (auto i = 0; i < size; ++i)
-        {
-            auto value = std::make_unique<TestObject>(rand() % size);
+            value = values.begin();
             state.ResumeTiming();
-
-            benchmark::DoNotOptimize(flatSet.find(value));
-
-            state.PauseTiming();
         }
     }
-    state.SetItemsProcessed(state.iterations() * size);
-    state.SetComplexityN(size);
+
+    state.SetItemsProcessed(state.iterations());
+    state.SetComplexityN(state.range(0));
 }
-BENCHMARK_TEMPLATE(flat_set_find_unique_ptr, boost::container::flat_set<TestObjectPtr, TestObjectLess>)
-->RangeMultiplier(2)->Range(1 << 3, 1 << 12)->Complexity(benchmark::oN);
+
+BENCHMARK_TEMPLATE(flat_set_insert, boost::container::flat_set<short>, true)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
+
+BENCHMARK_TEMPLATE(flat_set_insert, jstd::flat_set<short>, true)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
+
+BENCHMARK_TEMPLATE(flat_set_insert, boost::container::flat_set<int>, true)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
+
+BENCHMARK_TEMPLATE(flat_set_insert, jstd::flat_set<int>, true)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
+
+BENCHMARK_TEMPLATE(flat_set_insert, boost::container::flat_set<long long>, true)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
+
+BENCHMARK_TEMPLATE(flat_set_insert, jstd::flat_set<long long>, true)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
+
+BENCHMARK_TEMPLATE(flat_set_insert, boost::container::flat_set<TestValue*, TestObjectLess>, true)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
+
+BENCHMARK_TEMPLATE(flat_set_insert, jstd::flat_set<TestValue*, TestObjectLess>, true)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
+
+BENCHMARK_TEMPLATE(flat_set_insert, boost::container::flat_set<std::unique_ptr<TestValue>, TestObjectLess>, true)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
+
+BENCHMARK_TEMPLATE(flat_set_insert, jstd::flat_set<std::unique_ptr<TestValue>, TestObjectLess>, true)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
 
-template <typename FlatSet>
-static void flat_set_insert_int(benchmark::State& state)
-{
-    const auto size = state.range(0);
-
-    for (auto _ : state)
-    {
-        state.PauseTiming();
-
-        auto flatSet = FlatSet();
-        flatSet.reserve(static_cast<size_t>(size));
-
-        for (auto i = 0; i < size; ++i)
-        {
-            const auto value = rand() % size;
-
-            state.ResumeTiming();
-
-            flatSet.insert(value);
-
-            state.PauseTiming();
-        }
-
-    }
-    state.SetItemsProcessed(state.iterations() * size);
-    state.SetComplexityN(size);
-}
-BENCHMARK_TEMPLATE(flat_set_insert_int, boost::container::flat_set<int>)->RangeMultiplier(2)->Range(1 << 3, 1 << 12)->Complexity(benchmark::oN);
-
-
-template <typename FlatSet>
-static void flat_set_insert_ptr(benchmark::State& state)
-{
-    const auto size = state.range(0);
-
-    for (auto _ : state)
-    {
-        state.PauseTiming();
-
-        auto flatSet = FlatSet();
-        flatSet.reserve(static_cast<size_t>(size));
-
-        for (auto i = 0; i < size; ++i)
-        {
-            const auto value = new TestObject(rand() % size);
-
-            state.ResumeTiming();
-
-            flatSet.insert(value);
-
-            state.PauseTiming();
-        }
-
-        for (auto item : flatSet)
-            delete item;
-
-    }
-    state.SetItemsProcessed(state.iterations() * size);
-    state.SetComplexityN(size);
-}
-BENCHMARK_TEMPLATE(flat_set_insert_ptr, boost::container::flat_set<TestObject*, TestObjectLess>)
-->RangeMultiplier(2)->Range(1 << 3, 1 << 12)->Complexity(benchmark::oN);
-
-
-template <typename FlatSet>
-static void flat_set_insert_unique_ptr(benchmark::State& state)
-{
-    const auto size = state.range(0);
-
-    for (auto _ : state)
-    {
-        state.PauseTiming();
-
-        auto flatSet = FlatSet();
-        flatSet.reserve(static_cast<size_t>(size));
-
-        for (auto i = 0; i < size; ++i)
-        {
-            auto value = std::make_unique<TestObject>(rand() % size);
-
-            state.ResumeTiming();
-
-            flatSet.insert(std::move(value));
-
-            state.PauseTiming();
-        }
-
-    }
-    state.SetItemsProcessed(state.iterations() * size);
-    state.SetComplexityN(size);
-}
-BENCHMARK_TEMPLATE(flat_set_insert_unique_ptr, boost::container::flat_set<TestObjectPtr, TestObjectLess>)
-->RangeMultiplier(2)->Range(1 << 3, 1 << 12)->Complexity(benchmark::oN);
-
-
-template <typename FlatSet>
-static void flat_set_emplace_unique_ptr(benchmark::State& state)
-{
-    const auto size = state.range(0);
-
-    for (auto _ : state)
-    {
-        state.PauseTiming();
-
-        auto flatSet = FlatSet();
-        flatSet.reserve(static_cast<size_t>(size));
-
-        for (auto i = 0; i < size; ++i)
-        {
-            auto value = std::make_unique<TestObject>(rand() % size);
-
-            state.ResumeTiming();
-
-            flatSet.emplace(std::move(value));
-
-            state.PauseTiming();
-        }
-
-    }
-    state.SetItemsProcessed(state.iterations() * size);
-    state.SetComplexityN(size);
-}
-BENCHMARK_TEMPLATE(flat_set_emplace_unique_ptr, boost::container::flat_set<TestObjectPtr, TestObjectLess>)
-->RangeMultiplier(2)->Range(1 << 3, 1 << 12)->Complexity(benchmark::oN);

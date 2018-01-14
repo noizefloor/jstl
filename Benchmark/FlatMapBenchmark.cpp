@@ -4,217 +4,104 @@
 
 #include <boost/container/flat_map.hpp>
 
-class TestObject
-{
-public:
-    explicit TestObject(int value) : value_(value) {}
-
-    int getId() const { return value_; }
-
-private:
-    char payload_[100];
-    int value_;
-};
-
-
-template <typename Map, typename Creator>
-auto constructMap(int size, const Creator& creator)
-{
-    auto randomSet = Map();
-    randomSet.reserve(static_cast<size_t>(size));
-
-    for (auto i = 0; i < size; ++i)
-        randomSet.emplace(i, creator(i));
-
-    return randomSet;
-}
+#include "TestValue.h"
 
 
 template <typename FlatMap>
-static void flat_map_find_ptr(benchmark::State& state)
+static void flat_map_find(benchmark::State& state)
 {
     const auto size = state.range(0);
 
+    const auto valueCreator = ValueCreator<typename FlatMap::mapped_type>();
+
+    auto flatMap = FlatMap();
+    flatMap.reserve(static_cast<size_t>(size));
+
+    for (auto j = 0; j < size; ++j)
+        flatMap.insert(std::make_pair(j, valueCreator.create(j)));
+
+    auto testValue = 0;
+
     for (auto _ : state)
     {
-        state.PauseTiming();
-        auto creator = [](int value) { return new TestObject(value); };
-        auto flatMap = constructMap<FlatMap>(size, creator);
+        benchmark::DoNotOptimize(flatMap.find(testValue++));
 
-
-        for (auto i = 0; i < size; ++i)
-        {
-            const auto value = rand() % size;
-            state.ResumeTiming();
-
-            benchmark::DoNotOptimize(flatMap.find(value));
-
-            state.PauseTiming();
-        }
-
-        for (auto toDelete : flatMap)
-            delete toDelete.second;
+        if (testValue == size)
+            testValue = 0;
     }
-    state.SetItemsProcessed(state.iterations() * size);
+
+    state.SetItemsProcessed(state.iterations());
     state.SetComplexityN(size);
 }
-BENCHMARK_TEMPLATE(flat_map_find_ptr, boost::container::flat_map<int, TestObject*>)
-->RangeMultiplier(2)->Range(1 << 3, 1 << 12)->Complexity(benchmark::oN);
 
 
-template <typename FlatMap>
-static void flat_map_find_unique_ptr(benchmark::State& state)
+BENCHMARK_TEMPLATE(flat_map_find, boost::container::flat_map<int, TestValue*>)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
+
+BENCHMARK_TEMPLATE(flat_map_find, boost::container::flat_map<int, std::unique_ptr<TestValue>>)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
+
+
+template <typename FlatMap, bool reserved>
+static void flat_map_insert(benchmark::State& state)
 {
-    const auto size = state.range(0);
+    const auto doubleSize = state.range(0) * 2;
+    const auto size = static_cast<size_t>(state.range(0));
+
+    const auto valueCreator = ValueCreator<typename FlatMap::mapped_type>();
+
+    auto flatMapCreator = [&]
+    {
+        auto&& flatMap = FlatMap();
+
+        if (reserved)
+            flatMap.reserve(size * 2);
+        else
+            flatMap.reserve(size);
+
+        for (auto j = 0; j < doubleSize; j += 2)
+            flatMap.emplace(j, valueCreator.create(j));
+
+        return std::move(flatMap);
+    };
+
+    auto testValuesCreator = [&]
+    {
+        auto values = std::vector<typename FlatMap::value_type>();
+
+        for (auto j = 1; j < doubleSize; j += 2)
+            values.emplace_back(j, valueCreator.create(j));
+
+        return std::move(values);
+    };
+
+    auto&& flatMap = flatMapCreator();
+    auto&& values = testValuesCreator();
+
+    auto value = values.begin();
 
     for (auto _ : state)
     {
-        state.PauseTiming();
-        auto flatMap = constructMap<FlatMap>(size, [](int value) { return std::make_unique<TestObject>(value); });
+        flatMap.insert(std::move(*value++));
 
-
-        for (auto i = 0; i < size; ++i)
+        if (value == values.end())
         {
-            const auto value = rand() % size;
-            state.ResumeTiming();
-
-            benchmark::DoNotOptimize(flatMap.find(value));
-
             state.PauseTiming();
+            valueCreator.destroy();
+            flatMap = flatMapCreator();
+            values = testValuesCreator();
+
+            value = values.begin();
+            state.ResumeTiming();
         }
     }
-    state.SetItemsProcessed(state.iterations() * size);
-    state.SetComplexityN(size);
+
+    state.SetItemsProcessed(state.iterations());
+    state.SetComplexityN(state.range(0));
 }
-BENCHMARK_TEMPLATE(flat_map_find_unique_ptr, boost::container::flat_map<int, std::unique_ptr<TestObject> >)
-->RangeMultiplier(2)->Range(1 << 3, 1 << 12)->Complexity(benchmark::oN);
 
+BENCHMARK_TEMPLATE(flat_map_insert, boost::container::flat_map<int, TestValue*>, true)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-template <typename FlatMap>
-static void flat_map_insert_ptr(benchmark::State& state)
-{
-    const auto size = state.range(0);
-
-    for (auto _ : state)
-    {
-        state.PauseTiming();
-
-        auto flatMap = FlatMap();
-        flatMap.reserve(static_cast<size_t>(size));
-
-        for (auto i = 0; i < size; ++i)
-        {
-            const auto value = new TestObject(rand() % size);
-
-            state.ResumeTiming();
-
-            flatMap.insert(std::make_pair(value->getId(), value));
-
-            state.PauseTiming();
-        }
-
-        for (auto item : flatMap)
-            delete item.second;
-
-    }
-    state.SetItemsProcessed(state.iterations() * size);
-    state.SetComplexityN(size);
-}
-BENCHMARK_TEMPLATE(flat_map_insert_ptr, boost::container::flat_map<int, TestObject*>)
-->RangeMultiplier(2)->Range(1 << 3, 1 << 12)->Complexity(benchmark::oN);
-
-
-template <typename FlatMap>
-static void flat_map_insert_unique_ptr(benchmark::State& state)
-{
-    const auto size = state.range(0);
-
-    for (auto _ : state)
-    {
-        state.PauseTiming();
-
-        auto flatMap = FlatMap();
-        flatMap.reserve(static_cast<size_t>(size));
-
-        for (auto i = 0; i < size; ++i)
-        {
-            auto value = std::make_unique<TestObject>(rand() % size);
-
-            state.ResumeTiming();
-
-            flatMap.insert(std::make_pair(value->getId(), std::move(value)));
-
-            state.PauseTiming();
-        }
-    }
-    state.SetItemsProcessed(state.iterations() * size);
-    state.SetComplexityN(size);
-}
-BENCHMARK_TEMPLATE(flat_map_insert_unique_ptr, boost::container::flat_map<int, std::unique_ptr<TestObject> >)
-->RangeMultiplier(2)->Range(1 << 3, 1 << 12)->Complexity(benchmark::oN);
-
-
-
-template <typename FlatMap>
-static void flat_map_emplace_ptr(benchmark::State& state)
-{
-    const auto size = state.range(0);
-
-    for (auto _ : state)
-    {
-        state.PauseTiming();
-
-        auto flatMap = FlatMap();
-        flatMap.reserve(static_cast<size_t>(size));
-
-        for (auto i = 0; i < size; ++i)
-        {
-            const auto value = new TestObject(rand() % size);
-
-            state.ResumeTiming();
-
-            flatMap.emplace(value->getId(), value);
-
-            state.PauseTiming();
-        }
-
-        for (auto item : flatMap)
-            delete item.second;
-
-    }
-    state.SetItemsProcessed(state.iterations() * size);
-    state.SetComplexityN(size);
-}
-BENCHMARK_TEMPLATE(flat_map_emplace_ptr, boost::container::flat_map<int, TestObject*>)
-->RangeMultiplier(2)->Range(1 << 3, 1 << 12)->Complexity(benchmark::oN);
-
-
-
-template <typename FlatMap>
-static void flat_map_emplace_unique_ptr(benchmark::State& state)
-{
-    const auto size = state.range(0);
-
-    for (auto _ : state)
-    {
-        state.PauseTiming();
-
-        auto flatMap = FlatMap();
-        flatMap.reserve(static_cast<size_t>(size));
-
-        for (auto i = 0; i < size; ++i)
-        {
-            auto value = std::make_unique<TestObject>(rand() % size);
-
-            state.ResumeTiming();
-
-            flatMap.emplace(value->getId(), std::move(value));
-
-            state.PauseTiming();
-        }
-    }
-    state.SetItemsProcessed(state.iterations() * size);
-    state.SetComplexityN(size);
-}
-BENCHMARK_TEMPLATE(flat_map_emplace_unique_ptr, boost::container::flat_map<int, std::unique_ptr<TestObject> >)
-->RangeMultiplier(2)->Range(1 << 3, 1 << 12)->Complexity(benchmark::oN);
+BENCHMARK_TEMPLATE(flat_map_insert, boost::container::flat_map<int, std::unique_ptr<TestValue> >, true)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);

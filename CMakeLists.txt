@@ -88,6 +88,7 @@ find_package(benchmark)
 
 add_executable(jstlBenchmark
         Benchmark/stdafx.h
+        Benchmark/TestValue.h
         Benchmark/stdafx.cpp
         Benchmark/main.cpp
         Benchmark/ConveyorFunctionBenchmark.cpp
