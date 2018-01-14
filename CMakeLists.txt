@@ -85,6 +85,7 @@ add_test(NAME UnitTests COMMAND jstlTestHost --gtest_filter=UnitTest*)
 # Benchmarks
 
 find_package(benchmark)
+find_package(Threads)
 
 add_executable(jstlBenchmark
         Benchmark/stdafx.h
@@ -108,4 +109,5 @@ target_include_directories(jstlTestHost PRIVATE Benchmark)
 target_link_libraries(jstlBenchmark
     PRIVATE
         benchmark
-        jstl)
+        jstl
+        ${CMAKE_THREAD_LIBS_INIT})
