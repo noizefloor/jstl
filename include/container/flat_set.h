@@ -4,8 +4,6 @@
 
 #include <vector>
 
-#include <set>
-
 namespace jstd
 {
     template<class Key, class Compare = std::less<Key>, class Allocator = std::allocator<Key> >

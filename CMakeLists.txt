@@ -6,7 +6,7 @@ project(jstl)
 
 # Jan Schwers Template Library
 
-find_package(boost 1.5.6.0
+find_package(Boost 1.56.0
         REQUIRED
         COMPONENTS container)
 
