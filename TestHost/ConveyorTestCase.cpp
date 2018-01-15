@@ -9,7 +9,7 @@ using jstd::conveyor;
 using testing::ElementsAre;
 using namespace std::literals::string_literals;
 
-TEST(conveyor, pushByMoveAndWait)
+TEST(UnitTest_conveyor, pushByMoveAndWait)
 {
     auto&& results = std::vector<std::string>();
 
@@ -27,7 +27,7 @@ TEST(conveyor, pushByMoveAndWait)
     EXPECT_THAT(results, ElementsAre("value1"s, "value2"s, "value3"s, "value4"s, "value5"s));
 }
 
-TEST(conveyor, pushByCopyAndWait)
+TEST(UnitTest_conveyor, pushByCopyAndWait)
 {
     auto&& results = std::vector<std::string>();
 
@@ -72,7 +72,7 @@ private:
     std::string _value;
 };
 
-TEST(conveyor, notMoveAssignable)
+TEST(UnitTest_conveyor, notMoveAssignable)
 {
     auto&& results = std::vector<NotMoveAssignable>();
 
@@ -116,7 +116,7 @@ private:
     std::string _value;
 };
 
-TEST(conveyor, notMoveConstructable)
+TEST(UnitTest_conveyor, notMoveConstructable)
 {
     auto&& results = std::vector<std::string>();
 
@@ -157,7 +157,7 @@ private:
     std::string _value;
 };
 
-TEST(conveyor, notCopyable)
+TEST(UnitTest_conveyor, notCopyable)
 {
     auto&& results = std::vector<std::string>();
 
@@ -177,7 +177,7 @@ TEST(conveyor, notCopyable)
     EXPECT_THAT(results, ElementsAre("value1"s, "value2"s, "value3"s, "value4"s, "value5"s));
 }
 
-TEST(conveyor, conveyorPipe)
+TEST(UnitTest_conveyor, conveyorPipe)
 {
     auto&& results = std::vector<std::string>();
 

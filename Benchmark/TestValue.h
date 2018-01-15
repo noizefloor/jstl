@@ -14,13 +14,23 @@ private:
     int value_;
 };
 
-using TestObjectPtr = std::unique_ptr<TestValue>;
+using TestValuePtr = std::unique_ptr<TestValue>;
 
-struct TestObjectLess
+struct TestValueLess
 {
     bool operator()(const TestValue& l, const TestValue& r) const
     {
         return l.getId() < r.getId();
+    }
+
+    bool operator()(const TestValue& l, int r) const
+    {
+        return l.getId() < r;
+    }
+
+    bool operator()(int l, const TestValue& r) const
+    {
+        return l < r.getId();
     }
 
     bool operator()(TestValue* l, TestValue* r) const
@@ -28,28 +38,53 @@ struct TestObjectLess
         return l->getId() < r->getId();
     }
 
-    bool operator()(const TestObjectPtr& l, const TestObjectPtr& r) const
+    bool operator()(TestValue* l, int r) const
+    {
+        return l->getId() < r;
+    }
+
+    bool operator()(int l, TestValue* r) const
+    {
+        return l < r->getId();
+    }
+
+    bool operator()(const TestValuePtr& l, const TestValuePtr& r) const
     {
         return l->getId() < r->getId();
+    }
+
+    bool operator()(const TestValuePtr& l, int r) const
+    {
+        return l->getId() < r;
+    }
+
+    bool operator()(int l, const TestValuePtr& r) const
+    {
+        return l < r->getId();
     }
 };
 
 
 template <typename T>
-struct ValueCreator
+struct TestValueTool
 {
     T create(int value) const
     {
         return static_cast<T>(value);
     }
 
+    int getInt(T value) const
+    {
+        return static_cast<int>(value);
+    }
+
     void destroy() const {}
 };
 
 template <>
-struct ValueCreator<TestValue*>
+struct TestValueTool<TestValue*>
 {
-    ~ValueCreator()
+    ~TestValueTool()
     {
         destroy();
     }
@@ -63,6 +98,10 @@ struct ValueCreator<TestValue*>
         return testObject;
     }
 
+    int getInt(const TestValue* value) const
+    {
+        return value->getId();
+    }
 
     void destroy() const
     {
@@ -76,11 +115,16 @@ struct ValueCreator<TestValue*>
 };
 
 template <>
-struct ValueCreator<TestObjectPtr>
+struct TestValueTool<TestValuePtr>
 {
-    TestObjectPtr create(int value) const
+    TestValuePtr create(int value) const
     {
         return std::make_unique<TestValue>(value);
+    }
+
+    int getInt(const TestValuePtr& value) const
+    {
+        return value->getId();
     }
 
     void destroy() const {}

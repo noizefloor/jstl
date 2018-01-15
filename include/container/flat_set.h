@@ -77,6 +77,8 @@ namespace jstd
         {
             data_ = sequence_type(data_.get_allocator());
             insert(ilist);
+
+            return *this;
         }
 
         allocator_type get_allocator() const { return data_.get_allocator(); }
@@ -106,6 +108,7 @@ namespace jstd
         bool empty() const noexcept { return data_.empty(); }
         size_type size() const noexcept { return data_.size(); }
         size_type max_size() const noexcept { return data_.max_size(); }
+        size_type capacity() const noexcept { return data_.capacity(); }
 
         void reserve(size_type cnt) { data_.reserve(cnt); }
         void shrink_to_fit() { data_.shrink_to_fit(); }
@@ -150,7 +153,8 @@ namespace jstd
 
         size_type erase(const key_type& key)
         {
-            if (const auto it = internal_find(key) != cend())
+            const auto it = internal_find(key);
+            if (it != cend())
             {
                 data_.erase(it);
                 return 1;
@@ -162,7 +166,8 @@ namespace jstd
         template<class K>
         size_type erase(const K& x)
         {
-            if (const auto it = internal_find(x) != cend())
+            const auto it = internal_find(x);
+            if (it != cend())
             {
                 data_.erase(it);
                 return 1;

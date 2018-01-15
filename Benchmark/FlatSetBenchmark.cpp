@@ -13,13 +13,13 @@ static void flat_set_find(benchmark::State& state)
 {
     const auto size = state.range(0);
 
-    const auto valueCreator = ValueCreator<typename FlatSet::value_type>();
+    const auto valueTool = TestValueTool<typename FlatSet::value_type>();
 
     auto flatSet = FlatSet();
     flatSet.reserve(static_cast<size_t>(size));
 
     for (auto j = 0; j < size; ++j)
-        flatSet.insert(valueCreator.create(j));
+        flatSet.insert(valueTool.create(j));
 
     auto testValueIt = flatSet.cbegin();
 
@@ -53,16 +53,16 @@ BENCHMARK_TEMPLATE(flat_set_find, boost::container::flat_set<long long>)
 BENCHMARK_TEMPLATE(flat_set_find, jstd::flat_set<long long>)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_set_find, boost::container::flat_set<TestValue*, TestObjectLess>)
+BENCHMARK_TEMPLATE(flat_set_find, boost::container::flat_set<TestValue*, TestValueLess>)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_set_find, jstd::flat_set<TestValue*, TestObjectLess>)
+BENCHMARK_TEMPLATE(flat_set_find, jstd::flat_set<TestValue*, TestValueLess>)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_set_find, boost::container::flat_set<std::unique_ptr<TestValue>, TestObjectLess>)
+BENCHMARK_TEMPLATE(flat_set_find, boost::container::flat_set<std::unique_ptr<TestValue>, TestValueLess>)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_set_find, jstd::flat_set<std::unique_ptr<TestValue>, TestObjectLess>)
+BENCHMARK_TEMPLATE(flat_set_find, jstd::flat_set<std::unique_ptr<TestValue>, TestValueLess>)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
 
@@ -72,7 +72,7 @@ static void flat_set_insert(benchmark::State& state)
     const auto doubleSize = state.range(0) * 2;
     const auto size = static_cast<size_t>(state.range(0));
 
-    const auto valueCreator = ValueCreator<typename FlatSet::value_type>();
+    const auto valueTool = TestValueTool<typename FlatSet::value_type>();
 
     auto flatSetCreator = [&]
     {
@@ -84,7 +84,7 @@ static void flat_set_insert(benchmark::State& state)
             flatSet.reserve(size);
 
         for (auto j = 0; j < doubleSize; j += 2)
-            flatSet.insert(valueCreator.create(j));
+            flatSet.insert(valueTool.create(j));
 
         return std::move(flatSet);
     };
@@ -94,7 +94,7 @@ static void flat_set_insert(benchmark::State& state)
         auto values = std::vector<typename FlatSet::value_type>();
 
         for (auto j = 1; j < doubleSize; j += 2)
-            values.push_back(valueCreator.create(j));
+            values.push_back(valueTool.create(j));
 
         return std::move(values);
     };
@@ -111,7 +111,7 @@ static void flat_set_insert(benchmark::State& state)
         if (value == values.end())
         {
             state.PauseTiming();
-            valueCreator.destroy();
+            valueTool.destroy();
             flatSet = flatSetCreator();
             values = testValuesCreator();
 
@@ -142,16 +142,16 @@ BENCHMARK_TEMPLATE(flat_set_insert, boost::container::flat_set<long long>, true)
 BENCHMARK_TEMPLATE(flat_set_insert, jstd::flat_set<long long>, true)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_set_insert, boost::container::flat_set<TestValue*, TestObjectLess>, true)
+BENCHMARK_TEMPLATE(flat_set_insert, boost::container::flat_set<TestValue*, TestValueLess>, true)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_set_insert, jstd::flat_set<TestValue*, TestObjectLess>, true)
+BENCHMARK_TEMPLATE(flat_set_insert, jstd::flat_set<TestValue*, TestValueLess>, true)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_set_insert, boost::container::flat_set<std::unique_ptr<TestValue>, TestObjectLess>, true)
+BENCHMARK_TEMPLATE(flat_set_insert, boost::container::flat_set<std::unique_ptr<TestValue>, TestValueLess>, true)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_set_insert, jstd::flat_set<std::unique_ptr<TestValue>, TestObjectLess>, true)
+BENCHMARK_TEMPLATE(flat_set_insert, jstd::flat_set<std::unique_ptr<TestValue>, TestValueLess>, true)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
 

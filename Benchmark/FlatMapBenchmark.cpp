@@ -12,13 +12,13 @@ static void flat_map_find(benchmark::State& state)
 {
     const auto size = state.range(0);
 
-    const auto valueCreator = ValueCreator<typename FlatMap::mapped_type>();
+    const auto valueTool = TestValueTool<typename FlatMap::mapped_type>();
 
     auto flatMap = FlatMap();
     flatMap.reserve(static_cast<size_t>(size));
 
     for (auto j = 0; j < size; ++j)
-        flatMap.insert(std::make_pair(j, valueCreator.create(j)));
+        flatMap.insert(std::make_pair(j, valueTool.create(j)));
 
     auto testValue = 0;
 
@@ -48,7 +48,7 @@ static void flat_map_insert(benchmark::State& state)
     const auto doubleSize = state.range(0) * 2;
     const auto size = static_cast<size_t>(state.range(0));
 
-    const auto valueCreator = ValueCreator<typename FlatMap::mapped_type>();
+    const auto valueTool = TestValueTool<typename FlatMap::mapped_type>();
 
     auto flatMapCreator = [&]
     {
@@ -60,7 +60,7 @@ static void flat_map_insert(benchmark::State& state)
             flatMap.reserve(size);
 
         for (auto j = 0; j < doubleSize; j += 2)
-            flatMap.emplace(j, valueCreator.create(j));
+            flatMap.emplace(j, valueTool.create(j));
 
         return std::move(flatMap);
     };
@@ -70,7 +70,7 @@ static void flat_map_insert(benchmark::State& state)
         auto values = std::vector<typename FlatMap::value_type>();
 
         for (auto j = 1; j < doubleSize; j += 2)
-            values.emplace_back(j, valueCreator.create(j));
+            values.emplace_back(j, valueTool.create(j));
 
         return std::move(values);
     };
@@ -87,7 +87,7 @@ static void flat_map_insert(benchmark::State& state)
         if (value == values.end())
         {
             state.PauseTiming();
-            valueCreator.destroy();
+            valueTool.destroy();
             flatMap = flatMapCreator();
             values = testValuesCreator();
 

@@ -7,7 +7,7 @@
 using namespace std::literals::string_literals;
 using testing::ElementsAre;
 
-TEST(conveyor_function, pushByMove)
+TEST(UnitTest_conveyor_function, pushByMove)
 {
     auto&& results = std::vector<std::string>();
 
@@ -29,7 +29,7 @@ TEST(conveyor_function, pushByMove)
     EXPECT_THAT(results, ElementsAre("value1"s, "value2"s, "value3"s, "value4"s, "value5"s));
 }
 
-TEST(conveyor_function, pushByMove_notCopyable)
+TEST(UnitTest_conveyor_function, pushByMove_notCopyable)
 {
     using TestType = std::unique_ptr<std::string>;
     auto&& results = std::vector<TestType>();
@@ -52,7 +52,7 @@ TEST(conveyor_function, pushByMove_notCopyable)
     EXPECT_THAT(results, testing::SizeIs(5));
 }
 
-TEST(conveyor_function, pushByCopy)
+TEST(UnitTest_conveyor_function, pushByCopy)
 {
     auto&& results = std::vector<std::string>();
 
@@ -71,7 +71,7 @@ TEST(conveyor_function, pushByCopy)
     EXPECT_THAT(results, ElementsAre("value1"s, "value2"s, "value3"s, "value4"s, "value5"s));
 }
 
-TEST(conveyor_function, copyFirstFunctions)
+TEST(UnitTest_conveyor_function, copyFirstFunctions)
 {
     auto&& results = std::vector<std::string>();
 
@@ -91,7 +91,7 @@ TEST(conveyor_function, copyFirstFunctions)
     EXPECT_THAT(results, ElementsAre("value1"s, "value2"s, "value3"s));
 }
 
-TEST(conveyor_function, copySecondFunctions)
+TEST(UnitTest_conveyor_function, copySecondFunctions)
 {
     auto&& results = std::vector<std::string>();
 
@@ -108,7 +108,7 @@ TEST(conveyor_function, copySecondFunctions)
     EXPECT_THAT(results, ElementsAre("value1"s, "value2"s, "value3"s));
 }
 
-TEST(conveyor_function, copyBothFunctions)
+TEST(UnitTest_conveyor_function, copyBothFunctions)
 {
     auto&& results = std::vector<std::string>();
 
@@ -134,7 +134,7 @@ public:
     }
 };
 
-TEST(conveyor_function, producerThrows)
+TEST(UnitTest_conveyor_function, producerThrows)
 {
     auto&& results = std::vector<std::string>();
 
@@ -150,7 +150,7 @@ TEST(conveyor_function, producerThrows)
     EXPECT_THROW(jstd::conveyor_function(std::move(producer), std::move(consumer)), TestException);
 }
 
-TEST(conveyor_function, consumerThrowsWhileProducing)
+TEST(UnitTest_conveyor_function, consumerThrowsWhileProducing)
 {
     std::atomic_int processed(0);
 
@@ -169,7 +169,7 @@ TEST(conveyor_function, consumerThrowsWhileProducing)
     EXPECT_THROW(jstd::conveyor_function(std::move(producer), std::move(consumer)), TestException);
 }
 
-TEST(conveyor_function, consumerThrowsWhileWaiting)
+TEST(UnitTest_conveyor_function, consumerThrowsWhileWaiting)
 {
     std::atomic_int processed(0);
 
@@ -191,7 +191,7 @@ TEST(conveyor_function, consumerThrowsWhileWaiting)
     EXPECT_THROW(jstd::conveyor_function(std::move(producer), std::move(consumer)), TestException);
 }
 
-TEST(conveyor_function, pipeline_simple)
+TEST(UnitTest_conveyor_function, pipeline_simple)
 {
     auto results = std::vector<std::string>();
 
@@ -243,7 +243,7 @@ private:
     std::string _text;
 };
 
-TEST(conveyor_function, pipeline)
+TEST(UnitTest_conveyor_function, pipeline)
 {
     auto results = std::vector<std::string>();
 
@@ -272,7 +272,7 @@ TEST(conveyor_function, pipeline)
     EXPECT_THAT(results, ElementsAre("A"s, "AA"s, "AAA"s, "AAAA"s, "AAAAA"s));
 }
 
-TEST(conveyor_function, pipeline_consumer_throws)
+TEST(UnitTest_conveyor_function, pipeline_consumer_throws)
 {
     auto results = std::vector<std::string>();
 
@@ -304,7 +304,7 @@ TEST(conveyor_function, pipeline_consumer_throws)
     EXPECT_THROW(jstd::conveyor_function(producer, converter, consumer), TestException);
 }
 
-TEST(conveyor_function, pipeline_converter_throws)
+TEST(UnitTest_conveyor_function, pipeline_converter_throws)
 {
     auto results = std::vector<std::string>();
 
@@ -338,7 +338,7 @@ TEST(conveyor_function, pipeline_converter_throws)
     EXPECT_THROW(jstd::conveyor_function(producer, converter, consumer), TestException);
 }
 
-TEST(conveyor_function, forwarder_type)
+TEST(UnitTest_conveyor_function, forwarder_type)
 {
     using ForwarderType = jstd::conveyor_forwarder<std::string>;
 
@@ -350,7 +350,7 @@ TEST(conveyor_function, forwarder_type)
     EXPECT_TRUE(isString);
 }
 
-TEST(conveyor_function, forwarder_type_wrongType)
+TEST(UnitTest_conveyor_function, forwarder_type_wrongType)
 {
     const auto isForwarder = jstd::internal::forwarder_type<std::string>::is_forwarder;
     EXPECT_FALSE(isForwarder);
@@ -360,7 +360,7 @@ TEST(conveyor_function, forwarder_type_wrongType)
     EXPECT_FALSE(isString);
 }
 
-TEST(conveyor_function, callable_type_unknown_lambda)
+TEST(UnitTest_conveyor_function, callable_type_unknown_lambda)
 {
     auto input = [](std::string&) {};
 
@@ -370,7 +370,7 @@ TEST(conveyor_function, callable_type_unknown_lambda)
     EXPECT_EQ(jstd::internal::Callable::unknown, callableType);
 }
 
-TEST(conveyor_function, callable_type_unknown_variable)
+TEST(UnitTest_conveyor_function, callable_type_unknown_variable)
 {
     auto input = std::string();
 
@@ -380,7 +380,7 @@ TEST(conveyor_function, callable_type_unknown_variable)
     EXPECT_EQ(jstd::internal::Callable::unknown, callableType);
 }
 
-TEST(conveyor_function, callable_type_unknown_return_type)
+TEST(UnitTest_conveyor_function, callable_type_unknown_return_type)
 {
     auto input = [](jstd::conveyor_forwarder<std::string>&) { return 0; };
 
@@ -390,7 +390,7 @@ TEST(conveyor_function, callable_type_unknown_return_type)
     EXPECT_EQ(jstd::internal::Callable::unknown, callableType);
 }
 
-TEST(conveyor_function, callable_type_producer)
+TEST(UnitTest_conveyor_function, callable_type_producer)
 {
     auto input = [](jstd::conveyor_forwarder<std::string>&) {};
 
@@ -403,7 +403,7 @@ TEST(conveyor_function, callable_type_producer)
     EXPECT_TRUE(isTargetValid) << "converter_type::source is not std::string";
 }
 
-TEST(conveyor_function, callable_type_converter)
+TEST(UnitTest_conveyor_function, callable_type_converter)
 {
     auto input = [](std::vector<std::string>&&, jstd::conveyor_forwarder<std::string>&) {};
 
@@ -419,7 +419,7 @@ TEST(conveyor_function, callable_type_converter)
     EXPECT_TRUE(isTargetValid) << "converter_type::source is not std::string";
 }
 
-TEST(conveyor_function, callable_type_consumer)
+TEST(UnitTest_conveyor_function, callable_type_consumer)
 {
     auto input = [](std::vector<std::string>&&) {};
 
