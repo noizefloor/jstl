@@ -4,9 +4,6 @@ project(jstl)
 
 # Jan Schwers Template Library
 
-find_package(Boost 1.56.0
-        REQUIRED)
-
 add_library(jstl INTERFACE)
 
 target_compile_features(jstl INTERFACE cxx_std_14)
@@ -15,8 +12,6 @@ target_include_directories(jstl
     INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include/jstl>)
-
-target_link_libraries(jstl INTERFACE ${Boost_LIBRARIES})
 
 install(DIRECTORY include/ DESTINATION include/jstl)
 
@@ -74,8 +69,9 @@ add_test(NAME UnitTests COMMAND jstlTestHost --gtest_filter=UnitTest*)
 
 # Benchmarks
 
-find_package(benchmark)
+find_package(benchmark REQUIRED)
 find_package(Threads)
+find_package(Boost 1.56.0 REQUIRED)
 
 add_executable(jstlBenchmark
         Benchmark/TestValue.h
@@ -93,4 +89,5 @@ target_link_libraries(jstlBenchmark
     PRIVATE
         benchmark
         jstl
+        ${Boost_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT})
