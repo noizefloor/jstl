@@ -69,7 +69,7 @@ add_test(NAME UnitTests COMMAND jstlTestHost --gtest_filter=UnitTest*)
 
 # Benchmarks
 
-set(BENCHMARK_ENABLE_GTEST_TESTS OFF)
+set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE BOOL "Don't build benchmark gtests." FORCE)
 add_subdirectory(google-benchmark)
 
 find_package(Threads)
