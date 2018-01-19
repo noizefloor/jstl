@@ -69,7 +69,9 @@ add_test(NAME UnitTests COMMAND jstlTestHost --gtest_filter=UnitTest*)
 
 # Benchmarks
 
-find_package(benchmark REQUIRED)
+set(BENCHMARK_ENABLE_GTEST_TESTS OFF)
+add_subdirectory(google-benchmark)
+
 find_package(Threads)
 find_package(Boost 1.56.0 REQUIRED)
 
