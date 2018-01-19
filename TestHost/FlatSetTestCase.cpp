@@ -168,11 +168,11 @@ public:
     using ValueType = typename FlatSetType::value_type;
 
 
-    FlatSetType createFlatSet(std::initializer_list<int> initializerList) const
+    FlatSetType createFlatSet(const std::initializer_list<int>& initializerList) const
     {
         auto&& flatSet = FlatSetType();
-        for (auto it = initializerList.begin(); it != initializerList.end(); ++it)
-            flatSet.insert(valueTool_.create(*it));
+        for (const auto item : initializerList)
+            flatSet.insert(valueTool_.create(item));
 
         return std::move(flatSet);
     }
@@ -511,7 +511,7 @@ TYPED_TEST(UnitTest_flat_set, find_by_key_not_existing)
 
 TYPED_TEST(UnitTest_flat_set, find_by_comparable_existing)
 {
-    const auto values = { 4, 7, 3, 2, 9 };
+    auto values = { 4, 7, 3, 2, 9 };
     auto testSet = this->createFlatSet(values);
 
     for (auto value : values)

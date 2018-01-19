@@ -30,8 +30,7 @@ _ReSharper*/
 *.VC.db
 
 # CMake
-cmake-build-debug/
-cmake-build-release/
+cmake-build-*/
 
 # Clion
 .idea/**/workspace.xml
