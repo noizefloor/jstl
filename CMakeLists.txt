@@ -4,13 +4,16 @@ cmake_minimum_required(VERSION 3.5)
 
 if (${CMAKE_GENERATOR} STREQUAL "Unix Makefiles" OR ${CMAKE_GENERATOR} STREQUAL "Ninja")
 
-    if (NOT MSVC)
+    find_program(CCACHE_PROGRAM ccache)
+    if(CCACHE_PROGRAM)
+        set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ${CCACHE_PROGRAM})
+        set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ${CCACHE_PROGRAM})
 
-        find_program(CCACHE_PROGRAM ccache)
-        if(CCACHE_PROGRAM)
-            set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ${CCACHE_PROGRAM})
-            set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ${CCACHE_PROGRAM})
-        endif()
+        message("Using ccache: ${CCACHE_PROGRAM}")
+
+    else(CCACHE_PROGRAM)
+
+        message("No supported compiler cache found.")
 
     endif()
 
