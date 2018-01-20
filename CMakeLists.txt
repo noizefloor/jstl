@@ -44,6 +44,10 @@ endif()
 
 # Unit Tests
 
+if (MSVC)
+    set(gtest_force_shared_crt ON)
+endif(MSVC)
+
 add_subdirectory(googletest)
 
 enable_testing()
@@ -65,7 +69,7 @@ target_link_libraries(jstlTestHost
         gtest
         gmock)
 
-add_test(NAME UnitTests COMMAND jstlTestHost --gtest_filter=UnitTest*)
+add_test(NAME jstl-UnitTests COMMAND jstlTestHost --gtest_filter=UnitTest*)
 
 # Benchmarks
 
@@ -91,5 +95,5 @@ target_link_libraries(jstlBenchmark
     PRIVATE
         benchmark
         jstl
-        ${Boost_LIBRARIES}
+        Boost::boost
         ${CMAKE_THREAD_LIBS_INIT})
