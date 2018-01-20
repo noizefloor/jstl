@@ -77,7 +77,6 @@ add_executable(jstlTestHost
         TestHost/ConveyorTestCase.cpp
         TestHost/ConveyorFunctionTestCase.cpp
         TestHost/FunctionTraitsTestCase.cpp
-        TestHost/PerformanceCounter.cpp
         TestHost/main.cpp TestHost/FlatSetTestCase.cpp)
 
 target_compile_features(jstlTestHost PRIVATE cxx_std_14)
