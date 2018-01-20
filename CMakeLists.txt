@@ -1,5 +1,22 @@
 cmake_minimum_required(VERSION 3.5)
 
+# Compiler cache
+
+if (${CMAKE_GENERATOR} STREQUAL "Unix Makefiles" OR ${CMAKE_GENERATOR} STREQUAL "Ninja")
+
+    if (NOT MSVC)
+
+        find_program(CCACHE_PROGRAM ccache)
+        if(CCACHE_PROGRAM)
+            set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ${CCACHE_PROGRAM})
+            set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ${CCACHE_PROGRAM})
+        endif()
+
+    endif()
+
+endif()
+
+
 project(jstl)
 
 # Jan Schwers Template Library
@@ -26,7 +43,7 @@ find_package(Doxygen
         REQUIRED dot
         OPTIONAL_COMPONENTS mscgen dia)
 
-if (DOXYGEN_FOUND)
+if(DOXYGEN_FOUND)
 
     set(DOXYGEN_GENERATE_HTML YES)
     set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc)
@@ -37,14 +54,15 @@ if (DOXYGEN_FOUND)
             COMMENT "Jan Schwers Template Library API documentation")
 
     install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION share/doc)
-else (DOXYGEN_FOUND)
+
+else(DOXYGEN_FOUND)
     message("Doxygen need to be installed to generate the doxygen documentation")
 endif()
 
 
 # Unit Tests
 
-if (MSVC)
+if(MSVC)
     set(gtest_force_shared_crt ON)
 endif(MSVC)
 
