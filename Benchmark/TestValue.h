@@ -64,6 +64,71 @@ struct TestValueLess
     }
 };
 
+struct TestValueEqual
+{
+    bool operator()(const TestValue& l, const TestValue& r) const
+    {
+        return l.getId() == r.getId();
+    }
+
+    bool operator()(const TestValue& l, int r) const
+    {
+        return l.getId() == r;
+    }
+
+    bool operator()(int l, const TestValue& r) const
+    {
+        return l == r.getId();
+    }
+
+    bool operator()(TestValue* l, TestValue* r) const
+    {
+        return l->getId() == r->getId();
+    }
+
+    bool operator()(TestValue* l, int r) const
+    {
+        return l->getId() == r;
+    }
+
+    bool operator()(int l, TestValue* r) const
+    {
+        return l == r->getId();
+    }
+
+    bool operator()(const TestValuePtr& l, const TestValuePtr& r) const
+    {
+        return l->getId() == r->getId();
+    }
+
+    bool operator()(const TestValuePtr& l, int r) const
+    {
+        return l->getId() == r;
+    }
+
+    bool operator()(int l, const TestValuePtr& r) const
+    {
+        return l == r->getId();
+    }
+};
+
+struct TestValueHash
+{
+    size_t operator()(const TestValue& value) const
+    {
+        return std::hash<int>()(value.getId());
+    }
+
+    size_t operator()(const TestValue* value) const
+    {
+        return std::hash<int>()(value->getId());
+    }
+
+    size_t operator()(const TestValuePtr& value) const
+    {
+        return std::hash<int>()(value->getId());
+    }
+};
 
 template <typename T>
 struct TestValueTool

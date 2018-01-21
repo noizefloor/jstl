@@ -1,3 +1,5 @@
+#include <unordered_set>
+
 #include <benchmark/benchmark.h>
 
 #include <boost/container/flat_set.hpp>
@@ -57,10 +59,16 @@ BENCHMARK_TEMPLATE(flat_set_find, boost::container::flat_set<TestValue*, TestVal
 BENCHMARK_TEMPLATE(flat_set_find, jstd::flat_set<TestValue*, TestValueLess>)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
+BENCHMARK_TEMPLATE(flat_set_find, std::unordered_set<TestValue*, TestValueHash, TestValueEqual>)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
+
 BENCHMARK_TEMPLATE(flat_set_find, boost::container::flat_set<std::unique_ptr<TestValue>, TestValueLess>)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
 BENCHMARK_TEMPLATE(flat_set_find, jstd::flat_set<std::unique_ptr<TestValue>, TestValueLess>)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
+
+BENCHMARK_TEMPLATE(flat_set_find, std::unordered_set<std::unique_ptr<TestValue>, TestValueHash, TestValueEqual>)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
 
@@ -146,10 +154,16 @@ BENCHMARK_TEMPLATE(flat_set_insert, boost::container::flat_set<TestValue*, TestV
 BENCHMARK_TEMPLATE(flat_set_insert, jstd::flat_set<TestValue*, TestValueLess>, true)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
+BENCHMARK_TEMPLATE(flat_set_insert, std::unordered_set<TestValue*, TestValueHash, TestValueEqual>, true)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
+
 BENCHMARK_TEMPLATE(flat_set_insert, boost::container::flat_set<std::unique_ptr<TestValue>, TestValueLess>, true)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
 BENCHMARK_TEMPLATE(flat_set_insert, jstd::flat_set<std::unique_ptr<TestValue>, TestValueLess>, true)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
+
+BENCHMARK_TEMPLATE(flat_set_insert, std::unordered_set<std::unique_ptr<TestValue>, TestValueHash, TestValueEqual>, true)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
 
