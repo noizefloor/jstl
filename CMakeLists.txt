@@ -117,3 +117,22 @@ target_link_libraries(jstlBenchmark
         jstl
         Boost::boost
         ${CMAKE_THREAD_LIBS_INIT})
+
+
+# Memory profiling
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+find_package(Gperftools)
+
+if (${GPERFTOOLS_FOUND})
+
+    add_executable(MemoryProfiles MemoryProfiling/MemoryProfiles.cpp)
+
+    target_include_directories(MemoryProfiles PRIVATE ${GPERFTOOLS_INCLUDE_DIR})
+
+    target_link_libraries(MemoryProfiles
+        PRIVATE
+            jstl
+            Boost::boost
+            ${GPERFTOOLS_LIBRARIES})
+endif()
