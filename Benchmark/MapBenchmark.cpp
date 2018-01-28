@@ -5,11 +5,13 @@
 
 #include <boost/container/flat_map.hpp>
 
+#include <container/flat_hash_map.h>
+
 #include "TestValue.h"
 
 
 template <typename FlatMap>
-static void flat_map_find(benchmark::State& state)
+static void map_find(benchmark::State& state)
 {
     const auto size = state.range(0);
 
@@ -36,21 +38,29 @@ static void flat_map_find(benchmark::State& state)
 }
 
 
-BENCHMARK_TEMPLATE(flat_map_find, boost::container::flat_map<int, TestValue*>)
+BENCHMARK_TEMPLATE(map_find, boost::container::flat_map<int, TestValue*>)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_map_find, boost::container::flat_map<int, std::unique_ptr<TestValue> >)
+BENCHMARK_TEMPLATE(map_find, boost::container::flat_map<int, std::unique_ptr<TestValue> >)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_map_find, std::unordered_map<int, TestValue*>)
+
+BENCHMARK_TEMPLATE(map_find, std::unordered_map<int, TestValue*>)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_map_find, std::unordered_map<int, std::unique_ptr<TestValue>>)
+BENCHMARK_TEMPLATE(map_find, std::unordered_map<int, std::unique_ptr<TestValue>>)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
+
+
+BENCHMARK_TEMPLATE(map_find, jstd::flat_hash_map<int, TestValue*>)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
+
+BENCHMARK_TEMPLATE(map_find, jstd::flat_hash_map<int, std::unique_ptr<TestValue>>)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
 
 template <typename FlatMap, bool reserved>
-static void flat_map_insert(benchmark::State& state)
+static void map_insert(benchmark::State& state)
 {
     const auto doubleSize = state.range(0) * 2;
     const auto size = static_cast<size_t>(state.range(0));
@@ -107,14 +117,22 @@ static void flat_map_insert(benchmark::State& state)
     state.SetComplexityN(state.range(0));
 }
 
-BENCHMARK_TEMPLATE(flat_map_insert, boost::container::flat_map<int, TestValue*>, true)
+BENCHMARK_TEMPLATE(map_insert, boost::container::flat_map<int, TestValue*>, true)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_map_insert, boost::container::flat_map<int, std::unique_ptr<TestValue> >, true)
+BENCHMARK_TEMPLATE(map_insert, boost::container::flat_map<int, std::unique_ptr<TestValue> >, true)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_map_insert, std::unordered_map<int, TestValue*>, true)
+
+BENCHMARK_TEMPLATE(map_insert, std::unordered_map<int, TestValue*>, true)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_map_insert, std::unordered_map<int, std::unique_ptr<TestValue> >, true)
+BENCHMARK_TEMPLATE(map_insert, std::unordered_map<int, std::unique_ptr<TestValue> >, true)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
+
+
+BENCHMARK_TEMPLATE(map_insert, jstd::flat_hash_map<int, TestValue*>, true)
+->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
+
+BENCHMARK_TEMPLATE(map_insert, jstd::flat_hash_map<int, std::unique_ptr<TestValue> >, true)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);

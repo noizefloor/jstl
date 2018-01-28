@@ -9,7 +9,7 @@
 #include "TestValue.h"
 
 template <typename FlatSet>
-static void flat_set_find(benchmark::State& state)
+static void set_find(benchmark::State& state)
 {
     const auto size = state.range(0);
 
@@ -35,45 +35,45 @@ static void flat_set_find(benchmark::State& state)
     state.SetItemsProcessed(state.iterations());
     state.SetComplexityN(size);
 }
-BENCHMARK_TEMPLATE(flat_set_find, boost::container::flat_set<short>)
+BENCHMARK_TEMPLATE(set_find, boost::container::flat_set<short>)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_set_find, jstd::flat_set<short>)
+BENCHMARK_TEMPLATE(set_find, jstd::flat_set<short>)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_set_find, boost::container::flat_set<int>)
+BENCHMARK_TEMPLATE(set_find, boost::container::flat_set<int>)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_set_find, jstd::flat_set<int>)
+BENCHMARK_TEMPLATE(set_find, jstd::flat_set<int>)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_set_find, boost::container::flat_set<long long>)
+BENCHMARK_TEMPLATE(set_find, boost::container::flat_set<long long>)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_set_find, jstd::flat_set<long long>)
+BENCHMARK_TEMPLATE(set_find, jstd::flat_set<long long>)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_set_find, boost::container::flat_set<TestValue*, TestValueLess>)
+BENCHMARK_TEMPLATE(set_find, boost::container::flat_set<TestValue*, TestValueLess>)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_set_find, jstd::flat_set<TestValue*, TestValueLess>)
+BENCHMARK_TEMPLATE(set_find, jstd::flat_set<TestValue*, TestValueLess>)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_set_find, std::unordered_set<TestValue*, TestValueHash, TestValueEqual>)
+BENCHMARK_TEMPLATE(set_find, std::unordered_set<TestValue*, TestValueHash, TestValueEqual>)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_set_find, boost::container::flat_set<std::unique_ptr<TestValue>, TestValueLess>)
+BENCHMARK_TEMPLATE(set_find, boost::container::flat_set<std::unique_ptr<TestValue>, TestValueLess>)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_set_find, jstd::flat_set<std::unique_ptr<TestValue>, TestValueLess>)
+BENCHMARK_TEMPLATE(set_find, jstd::flat_set<std::unique_ptr<TestValue>, TestValueLess>)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_set_find, std::unordered_set<std::unique_ptr<TestValue>, TestValueHash, TestValueEqual>)
+BENCHMARK_TEMPLATE(set_find, std::unordered_set<std::unique_ptr<TestValue>, TestValueHash, TestValueEqual>)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
 
 template <typename FlatSet, bool reserved>
-static void flat_set_insert(benchmark::State& state)
+static void set_insert(benchmark::State& state)
 {
     const auto doubleSize = state.range(0) * 2;
     const auto size = static_cast<size_t>(state.range(0));
@@ -130,40 +130,40 @@ static void flat_set_insert(benchmark::State& state)
     state.SetComplexityN(state.range(0));
 }
 
-BENCHMARK_TEMPLATE(flat_set_insert, boost::container::flat_set<short>, true)
+BENCHMARK_TEMPLATE(set_insert, boost::container::flat_set<short>, true)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_set_insert, jstd::flat_set<short>, true)
+BENCHMARK_TEMPLATE(set_insert, jstd::flat_set<short>, true)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_set_insert, boost::container::flat_set<int>, true)
+BENCHMARK_TEMPLATE(set_insert, boost::container::flat_set<int>, true)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_set_insert, jstd::flat_set<int>, true)
+BENCHMARK_TEMPLATE(set_insert, jstd::flat_set<int>, true)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_set_insert, boost::container::flat_set<long long>, true)
+BENCHMARK_TEMPLATE(set_insert, boost::container::flat_set<long long>, true)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_set_insert, jstd::flat_set<long long>, true)
+BENCHMARK_TEMPLATE(set_insert, jstd::flat_set<long long>, true)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_set_insert, boost::container::flat_set<TestValue*, TestValueLess>, true)
+BENCHMARK_TEMPLATE(set_insert, boost::container::flat_set<TestValue*, TestValueLess>, true)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_set_insert, jstd::flat_set<TestValue*, TestValueLess>, true)
+BENCHMARK_TEMPLATE(set_insert, jstd::flat_set<TestValue*, TestValueLess>, true)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_set_insert, std::unordered_set<TestValue*, TestValueHash, TestValueEqual>, true)
+BENCHMARK_TEMPLATE(set_insert, std::unordered_set<TestValue*, TestValueHash, TestValueEqual>, true)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_set_insert, boost::container::flat_set<std::unique_ptr<TestValue>, TestValueLess>, true)
+BENCHMARK_TEMPLATE(set_insert, boost::container::flat_set<std::unique_ptr<TestValue>, TestValueLess>, true)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_set_insert, jstd::flat_set<std::unique_ptr<TestValue>, TestValueLess>, true)
+BENCHMARK_TEMPLATE(set_insert, jstd::flat_set<std::unique_ptr<TestValue>, TestValueLess>, true)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
-BENCHMARK_TEMPLATE(flat_set_insert, std::unordered_set<std::unique_ptr<TestValue>, TestValueHash, TestValueEqual>, true)
+BENCHMARK_TEMPLATE(set_insert, std::unordered_set<std::unique_ptr<TestValue>, TestValueHash, TestValueEqual>, true)
 ->RangeMultiplier(2)->Range(1 << 7, 1 << 13)->Complexity(benchmark::oN);
 
 
