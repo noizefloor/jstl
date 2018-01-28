@@ -119,7 +119,7 @@ namespace jstd
 
         std::pair<iterator,bool> insert(const value_type& value)
         {
-            auto it = lower_bound(value);
+            const auto it = internal_lower_bound(value);
 
             if (it == cend() || comp_(value, *it))
                 return { data_.insert(it, value), true };
@@ -129,7 +129,7 @@ namespace jstd
 
         std::pair<iterator,bool> insert(value_type&& value)
         {
-            auto it = lower_bound(value);
+            const auto it = internal_lower_bound(value);
 
             if (it == cend() || comp_(value, *it))
                 return { data_.insert(it, std::forward<value_type>(value)), true };
