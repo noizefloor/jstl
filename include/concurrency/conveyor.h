@@ -24,7 +24,6 @@
 
 #include <queue>
 #include <future>
-#include <atomic>
 #include <type_traits>
 #include <mutex>
 #include <condition_variable>
@@ -42,25 +41,28 @@ namespace jstd
         using ProcessorFunction = std::function<void(ForwardType&&)>;
 
     public:
-        conveyor(const ProcessorFunction& processor)
-            : _processor(processor)
-            , _processorHandle(std::async(std::launch::async, [this] { run(); }))
+        explicit conveyor(const ProcessorFunction& processor)
+            : processor_(processor)
+            , processorHandle_(std::async(std::launch::async, [this] { run(); }))
         {
         }
 
-        conveyor(ProcessorFunction&& processor)
-            : _processor(std::move(processor))
-            , _processorHandle(std::async(std::launch::async, [this] { run(); }))
+        explicit conveyor(ProcessorFunction&& processor)
+            : processor_(std::move(processor))
+            , processorHandle_(std::async(std::launch::async, [this] { run(); }))
         {
         }
 
         ~conveyor()
         {
-            _shouldFinish = true;
+            {
+                std::lock_guard<std::mutex> lock(guard_);
+                shouldFinish_ = true;
+            }
 
-            _cv.notify_one();
+            cv_.notify_one();
 
-            _processorHandle.wait();
+            processorHandle_.wait();
         }
 
         void push(ForwardType&& forwardValue)
@@ -80,45 +82,45 @@ namespace jstd
         template <typename T>
         void push_internal(T&& forwardValue)
         {
-            std::unique_lock<std::mutex> lock(_lock);
+            std::unique_lock<std::mutex> lock(guard_);
 
-            _queue.push(std::forward<T>(forwardValue));
+            queue_.push(std::forward<T>(forwardValue));
 
             lock.unlock();
-            _cv.notify_one();
+            cv_.notify_one();
         }
 
         void run()
         {
             while(true)
             {
-                std::unique_lock<std::mutex> lock(_lock);
+                std::unique_lock<std::mutex> lock(guard_);
 
-                if (_queue.empty() && !_shouldFinish)
-                    _cv.wait(lock, [this] { return !_queue.empty() || _shouldFinish; });
+                if (queue_.empty() && !shouldFinish_)
+                    cv_.wait(lock, [this] { return !queue_.empty() || shouldFinish_; });
 
-                if (!_queue.empty())
+                if (!queue_.empty())
                 {
-                    auto value = std::forward<ForwardType>(_queue.front());
-                    _queue.pop();
+                    auto value = std::forward<ForwardType>(queue_.front());
+                    queue_.pop();
 
                     lock.unlock();
 
-                    _processor(std::forward<ForwardType>(value));
+                    processor_(std::forward<ForwardType>(value));
                 }
-                else if (_shouldFinish)
+                else if (shouldFinish_)
                     return;
             }
         }
 
     private:
-        std::queue<ForwardType> _queue;
-        std::mutex _lock;
-        std::condition_variable _cv;
+        std::queue<ForwardType> queue_;
+        std::mutex guard_;
+        std::condition_variable cv_;
 
-        std::atomic_bool _shouldFinish { false };
+        bool shouldFinish_ { false };
 
-        ProcessorFunction _processor;
-        std::future<void> _processorHandle;
+        ProcessorFunction processor_;
+        std::future<void> processorHandle_;
     };
 }
